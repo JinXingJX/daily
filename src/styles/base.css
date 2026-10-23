@@ -1,0 +1,66 @@
+/* ---- Base ---- */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--app-body-bg);
+  color: var(--text);
+  font-family: var(--font-geist-sans);
+  font-size: 13px;
+  font-kerning: normal;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--accent-soft-hover);
+  color: var(--text-strong);
+}
+
+kbd {
+  font-family: var(--font-geist-mono);
+}
+
+.app-shell button,
+.app-shell input,
+.app-shell textarea,
+.app-shell select {
+  letter-spacing: 0;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.kbd {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface-strong);
+  padding: 0 0.25rem;
+  color: var(--text-muted);
+  font-family: var(--font-geist-mono);
+  font-size: 11px;
+  line-height: 1.05rem;
+}
+
+.mono {
+  font-family: var(--font-geist-mono);
+}
+
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}

@@ -1,0 +1,19 @@
+{
+  "identifier": "local.writer_lab",
+  "name": "Writer Lab",
+  "description": "Example local plugin that opens a dedicated AI-assisted writing canvas.",
+  "version": "0.1.0",
+  "author": "Local Dev",
+  "contributes": {
+    "views": [
+      {
+        "id": "writer-lab.canvas",
+        "title": "Writer Lab",
+        "location": "main",
+        "runtime": "iframe",
+        "entry": "view.js",
+        "icon": "notebook-pen"
+      }
+    ]
+  }
+}

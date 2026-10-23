@@ -1,0 +1,24 @@
+# Dependencies and build output
+node_modules
+dist
+dist-ssr
+out
+target
+release
+
+# Daily workspace state (sessions, local settings) created when this repo is opened as a workspace
+.daily
+
+# Local files
+*.local
+*.log
+.env
+.env.*
+
+# Editors and OS
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.sw?

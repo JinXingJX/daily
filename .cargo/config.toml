@@ -1,0 +1,5 @@
+[env]
+# Consumed by `npm run gen:protocol` (cargo test --features ts). Large integers are
+# ids and timestamps that stay well below 2^53, so they map to `number`.
+TS_RS_EXPORT_DIR = { value = "src/generated/protocol", relative = true }
+TS_RS_LARGE_INT = "number"

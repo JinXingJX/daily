@@ -1,0 +1,69 @@
+/* ---- Rail ---- */
+
+.app-rail {
+  display: flex;
+  width: var(--rail-width);
+  flex: 0 0 var(--rail-width);
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border-right: 1px solid var(--line);
+  background: var(--app-rail-bg);
+  padding: 10px 0;
+}
+
+.app-rail-button {
+  --rail-tone: var(--text-strong);
+  position: relative;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-panel);
+  background: transparent;
+  color: var(--text-soft);
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.app-rail-button:hover {
+  background: var(--geist-gray-alpha-100);
+  color: var(--text-strong);
+}
+
+.app-rail-button-active,
+.app-rail-button-active:hover {
+  background: var(--surface-strong);
+  color: var(--rail-tone);
+  box-shadow: var(--shadow-raised);
+}
+
+.app-rail-button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.app-rail-badge {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  box-shadow: 0 0 0 2px var(--app-rail-bg);
+}
+
+.app-rail-button-active .app-rail-badge {
+  box-shadow: 0 0 0 2px var(--surface-strong);
+}
+
+.app-rail-divider {
+  width: 20px;
+  height: 1px;
+  margin: 6px 0;
+  background: var(--line);
+}

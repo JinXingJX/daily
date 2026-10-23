@@ -1,0 +1,8 @@
+/* ---- Inline plugin cards ---- */
+
+.workbench-panel {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background: var(--surface-strong);
+}

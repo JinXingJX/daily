@@ -1,0 +1,15 @@
+[package]
+name = "daily-app-server"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "JSONL stdio server for Daily desktop clients"
+
+[dependencies]
+daily-core = { path = "../daily-core" }
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+

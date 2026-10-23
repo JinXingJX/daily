@@ -1,0 +1,48 @@
+/* ---- Command palette ---- */
+
+.command-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: start center;
+  background: var(--overlay);
+  padding: 112px 16px 16px;
+}
+
+.command-panel {
+  display: flex;
+  width: min(640px, 100%);
+  max-height: calc(100dvh - 140px);
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-popover);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-modal);
+}
+
+.command-option {
+  display: flex;
+  width: 100%;
+  height: 40px;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  padding: 0 10px;
+  color: var(--text);
+  text-align: left;
+}
+
+.command-option[aria-selected="true"] {
+  background: var(--accent-soft);
+  color: var(--text-strong);
+}
+
+.command-option mark {
+  background: transparent;
+  color: var(--accent-text);
+  font-weight: 600;
+}

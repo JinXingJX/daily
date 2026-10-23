@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+/* Section files are imported in cascade order; later sections (motion, responsive) override earlier ones. */
+@import "./styles/tokens.css";
+@import "./styles/base.css";
+@import "./styles/chrome.css";
+@import "./styles/rail.css";
+@import "./styles/sidebar.css";
+@import "./styles/conversation.css";
+@import "./styles/inspector.css";
+@import "./styles/settings.css";
+@import "./styles/command-palette.css";
+@import "./styles/inline-plugins.css";
+@import "./styles/motion.css";
+@import "./styles/responsive.css";

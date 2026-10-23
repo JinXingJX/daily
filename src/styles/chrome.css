@@ -1,0 +1,183 @@
+/* ---- Window chrome ---- */
+
+.app-drag {
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.no-drag,
+.app-drag button,
+.app-drag a,
+.app-drag input,
+.app-drag select,
+.app-drag textarea {
+  -webkit-app-region: no-drag;
+}
+
+.app-shell {
+  isolation: isolate;
+  background: var(--app-shell-bg);
+}
+
+.app-main {
+  background: var(--app-main-bg);
+}
+
+.window-titlebar {
+  height: var(--titlebar-height);
+  border-bottom: 1px solid var(--line);
+  background: var(--chrome);
+}
+
+.titlebar-lead {
+  display: flex;
+  height: 100%;
+  flex: none;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 8px 0 var(--traffic-light-safe);
+}
+
+.titlebar-main {
+  display: flex;
+  height: 100%;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  border-left: 1px solid var(--line);
+  background: var(--app-main-bg);
+  padding: 0 12px 0 16px;
+}
+
+.titlebar-icon {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text-soft);
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.titlebar-icon:hover,
+.titlebar-icon[aria-pressed="true"] {
+  background: var(--geist-gray-alpha-100);
+  color: var(--text-strong);
+}
+
+.titlebar-icon:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.titlebar-command {
+  display: inline-flex;
+  height: 30px;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  padding: 0 8px 0 10px;
+  color: var(--text-soft);
+  font-size: 12px;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
+}
+
+.titlebar-command:hover {
+  border-color: var(--line-strong);
+  background: var(--surface-muted);
+}
+
+.titlebar-command:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.run-pill {
+  display: inline-flex;
+  height: 26px;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--radius-full);
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.run-pill[data-state="running"] {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+.run-pill[data-state="waiting"] {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.run-pill[data-state="failed"] {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.run-pill-sep {
+  opacity: 0.55;
+}
+
+.status-bar {
+  display: flex;
+  height: var(--statusbar-height);
+  flex: none;
+  align-items: center;
+  gap: 16px;
+  border-top: 1px solid var(--line);
+  background: var(--chrome);
+  padding: 0 12px;
+  color: var(--text-soft);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.status-bar-item {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: var(--radius-full);
+  background: var(--text-disabled);
+}
+
+.status-dot[data-tone="success"] {
+  background: var(--success-fill);
+}
+
+.status-dot[data-tone="warning"] {
+  background: var(--warning-fill);
+}
+
+.status-dot[data-tone="danger"] {
+  background: var(--danger-fill);
+}
+
+.status-dot[data-tone="accent"] {
+  background: var(--accent);
+}
