@@ -7,7 +7,7 @@ import { parseIncomingFrame, requestTimeout, SidecarClient, sidecarExecutableNam
 
 const cleanupPaths: string[] = [];
 const clients: SidecarClient[] = [];
-const executable = process.env.DAILY_TEST_SIDECAR ?? resolve("target/debug", sidecarExecutableName());
+const executable = resolve(process.env.DAILY_TEST_SIDECAR ?? join("target/debug", sidecarExecutableName()));
 
 afterEach(async () => {
   await Promise.all(clients.splice(0).map((client) => client.shutdown()));
