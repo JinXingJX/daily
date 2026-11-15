@@ -5,7 +5,7 @@
 
 [English](README.md)
 
-Daily 是一个本地桌面工作台，用来让 AI 智能体在你电脑上的某个文件夹里工作。界面基于 Electron + React，智能体循环、模型提供商、持久化和沙箱插件系统由一个 Rust 运行时负责。
+Daily 是一个本地桌面工作台，用来让 AI 智能体在你电脑上的某个文件夹里工作。界面基于 Electron + React，智能体循环、模型提供商、持久化和经宿主校验的插件接口由一个 Rust 运行时负责。
 
 <!-- 截图：添加 docs/images/workbench.png 后在此引用。 -->
 

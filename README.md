@@ -5,7 +5,7 @@
 
 [简体中文](README.zh-CN.md)
 
-Daily is a local desktop workbench for running AI agents against a folder on your machine. It pairs an Electron + React interface with a Rust runtime that owns the agent loop, model providers, persistence, and a sandboxed plugin system.
+Daily is a local desktop workbench for running AI agents against a folder on your machine. It pairs an Electron + React interface with a Rust runtime that owns the agent loop, model providers, persistence, and a validated plugin host API.
 
 <!-- Screenshot: add docs/images/workbench.png and reference it here. -->
 

@@ -31,5 +31,5 @@ Daily runs AI agents and plugins on your machine with access to a workspace fold
 ## Hardening tips
 
 - Add `.daily/` to the workspace's `.gitignore`; it contains session transcripts and local settings.
-- Provider keys you enter in the app are stored in plain text in `~/.daily/settings.json` (or a workspace's `settings.local.json`). Daily keeps those files readable by your account only, but anything running as you can read them. Prefer `apiKeyEnv`, which keeps the key out of the file.
-- Keep Daily updated; builds are currently unsigned, so verify you downloaded them from this repository's releases.
+- Provider keys you enter in the app are stored in plain text in `~/.daily/settings.json` (or a workspace's `settings.local.json`). On Unix, Daily restricts these files to your account. On Windows, files inherit the folder ACL, so keep user settings in your private Windows profile and protect workspace-local settings. Anything running as you can read them. Prefer `apiKeyEnv`, which keeps the key out of the file.
+- Keep Daily updated; builds are currently unsigned, so verify you downloaded them from this repository's Actions artifacts or releases.
