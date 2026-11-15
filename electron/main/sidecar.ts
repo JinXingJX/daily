@@ -64,6 +64,7 @@ export class SidecarClient extends EventEmitter {
       cwd: this.workspacePath,
       env: process.env,
       stdio: ["pipe", "pipe", "pipe"],
+      windowsHide: true,
     });
     this.child = child;
 

@@ -767,7 +767,7 @@ pub(crate) struct PluginAgentTaskFlow {
 
 /// A failed segment, with the steps it got through before failing.
 pub(crate) struct PluginAgentTaskFlowError {
-    pub(crate) runtime_checkpoint: Option<daily_agent_core::checkpoint::RunCheckpoint>,
+    pub(crate) runtime_checkpoint: Option<Box<daily_agent_core::checkpoint::RunCheckpoint>>,
     pub(crate) error: String,
     pub(crate) event_views: Vec<agent::AgentEventView>,
     pub(crate) iterations_used: usize,
@@ -949,7 +949,7 @@ pub(crate) async fn run_plugin_agent_task_flow(
                 sink.flush();
             }
             return Err(PluginAgentTaskFlowError {
-                runtime_checkpoint,
+                runtime_checkpoint: runtime_checkpoint.map(Box::new),
                 error,
                 event_views,
                 iterations_used,
@@ -1053,7 +1053,7 @@ async fn retain_interrupted_checkpoint(
         if failure.runtime_checkpoint.is_none() {
             let id = pending.runtime_run_id.as_deref().unwrap_or(&pending.run_id);
             if let Ok(Some(checkpoint)) = state.agent_checkpoints.load(id).await {
-                failure.runtime_checkpoint = Some(checkpoint);
+                failure.runtime_checkpoint = Some(Box::new(checkpoint));
             }
         }
     }

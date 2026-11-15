@@ -60,7 +60,7 @@ Local validation includes the complete app test/build command, strict workspace
 Clippy, plugin SDK TypeScript checks, both plugin test/build commands, a real
 standalone Core consumer and a self-contained SDK source archive. Known npm
 dependency vulnerabilities in the plugins' old build/test tools were addressed
-by upgrading those tools and their locked transitive dependencies.
+by upgrading those tools and their locked transitive dependencies. The final npm audits for all three repositories and the RustSec audit of `Cargo.lock` reported zero known vulnerabilities.
 
 GitHub Actions is the source of truth for the current native Windows/Linux CI
 status. Workflows use standard hosted runners, read-only repository permissions,

@@ -370,7 +370,7 @@ impl<'a> SessionStore<'a> {
             .into_iter()
             .filter(|item| scope.is_none_or(|scope| item.scope == scope))
             .collect::<Vec<_>>();
-        sessions.sort_by(|left, right| right.updated_at.cmp(&left.updated_at));
+        sessions.sort_by_key(|session| std::cmp::Reverse(session.updated_at));
         Ok(sessions)
     }
 
