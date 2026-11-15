@@ -16,8 +16,8 @@ export function sidecarExecutableName(platform: NodeJS.Platform = process.platfo
 /** File identity handles Windows namespaces, drive spelling and directory aliases. */
 export function isSameWorkspaceDirectory(expectedPath: string, actualPath: string): boolean {
   try {
-    const expected = statSync(expectedPath, { bigint: true });
-    const actual = statSync(actualPath, { bigint: true });
+    const expected = statSync(realpathSync.native(expectedPath), { bigint: true });
+    const actual = statSync(realpathSync.native(actualPath), { bigint: true });
     return expected.isDirectory() && actual.isDirectory()
       && expected.ino !== 0n && expected.dev === actual.dev && expected.ino === actual.ino;
   } catch {
