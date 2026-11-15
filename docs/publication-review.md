@@ -48,6 +48,8 @@ unofficial; no third-party OAuth client secret is distributed.
   characters in workspace paths.
 - Reject case variants of `.daily`, and on Windows reject alternate data streams
   and trailing-dot/space filename aliases at the shared sandbox boundary.
+- Resolve plugin resource paths against their real registered directory and reject
+  symlink/junction escapes before reading files into the renderer.
 - Close temporary Rust files before replacement and preserve existing atomic-write
   regression coverage.
 - Use LF checkout rules and an OS-independent Vitest directory argument.

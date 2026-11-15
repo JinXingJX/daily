@@ -17,7 +17,7 @@ cargo clippy --workspace --all-targets -- -D warnings
 ## Making changes
 
 - **Keep Rust the source of truth for wire types.** Add serialized types with the `cfg_attr(feature = "ts", derive(ts_rs::TS), ts(export))` derive and run `npm run gen:protocol`. Never edit `src/generated/`, `electron/shared/commands.generated.ts`, or `packages/plugin-sdk/src/methods.generated.ts` by hand.
-- **New desktop command:** declare it in `desktop_commands!` (`crates/daily-core/src/runtime/mod.rs`) and keep the handler thin; put logic in `daily-core` modules.
+- **New desktop command:** declare it in `desktop_commands!` (`crates/daily-desktop-runtime/src/runtime/mod.rs`) and keep the handler thin; put desktop logic in `daily-desktop-runtime` and reusable agent execution in `daily-agent-core`.
 - **New plugin RPC method:** see [docs/plugin-development.md](docs/plugin-development.md#adding-a-host-api-method).
 - **UI text:** write English in `t("…")` and add the Chinese translation to `src/i18n/zh-CN.ts`. Rust messages are English; runtime text shown in the UI needs a template in `packages/plugin-sdk/src/hostText.ts`.
 - **Security-sensitive code** (paths, network, IPC, plugin frames, settings scopes) needs a regression test at the lowest layer that enforces the rule. See [SECURITY.md](SECURITY.md).

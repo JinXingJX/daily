@@ -26,7 +26,7 @@ Daily is used by a developer on a 14 to 27-inch display for long agent sessions 
 - Conversation views may open a 340px inspector (run, context, hooks tabs) on the right. Below 1180px it overlays the canvas instead of compressing it.
 - Settings replace the task panel with their own 288px navigation.
 - Window: 1440×960 default, 1180×760 minimum.
-- Main canvas owns all remaining space. Plugin iframe views begin below the unified titlebar and fill the canvas.
+- Main canvas owns all remaining space. Retained plugin Shadow DOM views begin below the unified titlebar and fill the canvas.
 - The conversation composer is a bounded, floating control near the bottom of the canvas rather than a full-width footer.
 - Z-index: canvas 0, inspector overlay 25, status banner 20, titlebar 30, command overlay 50.
 - Keyboard: ⌘K command palette, ⌘N new task, ⌘I inspector, ⌘, settings, ⌘⏎ send, ⌘S save agent.

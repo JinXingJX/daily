@@ -1,6 +1,7 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { EventEmitter } from "node:events";
 import { realpathSync } from "node:fs";
+import { win32 } from "node:path";
 import { createInterface } from "node:readline";
 import { DesktopCommandError, type BackendStatus } from "../shared/contracts";
 
@@ -11,6 +12,11 @@ const REQUEST_TIMEOUT_MS = 30_000;
 
 export function sidecarExecutableName(platform: NodeJS.Platform = process.platform): string {
   return platform === "win32" ? "daily-app-server.exe" : "daily-app-server";
+}
+
+function canonicalWorkspacePath(path: string): string {
+  const canonical = realpathSync(path);
+  return process.platform === "win32" ? win32.toNamespacedPath(canonical) : canonical;
 }
 // Chat turns return as soon as they are queued and stream progress as events. These plugin
 // methods resolve only when the model or agent task finishes, which can take many model
@@ -52,7 +58,7 @@ export class SidecarClient extends EventEmitter {
   constructor(executable: string, workspacePath: string) {
     super();
     this.executable = executable;
-    this.workspacePath = realpathSync(workspacePath);
+    this.workspacePath = canonicalWorkspacePath(workspacePath);
   }
 
   async start(): Promise<void> {
@@ -247,7 +253,7 @@ export class SidecarClient extends EventEmitter {
       // sides with Node before comparing, while still rejecting a different workspace.
       let workspaceRoot: string | null = null;
       try {
-        workspaceRoot = realpathSync(frame.workspaceRoot);
+        workspaceRoot = canonicalWorkspacePath(frame.workspaceRoot);
       } catch {
         // A missing or inaccessible root cannot be the workspace we opened.
       }

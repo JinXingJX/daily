@@ -31,7 +31,8 @@ Daily 仍处于早期阶段。本地验证使用 Apple Silicon macOS，CI 覆盖
 - Windows 10/11 x64，或 Apple Silicon 上的 macOS 14 及以上
 - Node.js 22.12 及以上（仓库包含 `.nvmrc`）
 - 当前稳定版 Rust 工具链（[rustup](https://rustup.rs)）
-- Xcode 命令行工具（`xcode-select --install`）
+- Windows：Visual Studio Build Tools，安装“使用 C++ 的桌面开发”和 Windows SDK
+- macOS：Xcode 命令行工具（`xcode-select --install`）
 
 ```bash
 git clone https://github.com/JinXingJX/daily.git

@@ -87,8 +87,10 @@ describe("SidecarClient", () => {
     const client = new SidecarClient(executable, workspacePath);
     clients.push(client);
     const starting = client.start();
-    const snapshot = await client.invoke<{ workspace: { rootId: number } }>("get_app_snapshot");
-    await starting;
+    const [, snapshot] = await Promise.all([
+      starting,
+      client.invoke<{ workspace: { rootId: number } }>("get_app_snapshot"),
+    ]);
     expect(snapshot.workspace.rootId).toBeTypeOf("number");
   }, 20_000);
 });

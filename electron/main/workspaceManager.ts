@@ -428,7 +428,7 @@ export class WorkspaceWindowManager {
 
   private servePluginModules(): void {
     session.defaultSession.protocol.handle("daily-plugin", async (request) => {
-      const file = request.method === "GET" ? this.pluginModules.filePath(request.url) : null;
+      const file = request.method === "GET" ? await this.pluginModules.readableFilePath(request.url) : null;
       if (!file) return new Response("Not found", { status: 404 });
       try {
         const [body, info] = await Promise.all([readFile(file), stat(file)]);
