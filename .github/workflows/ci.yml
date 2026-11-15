@@ -64,14 +64,23 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           key: desktop
+          cache-on-failure: true
       - name: Install dependencies
         run: npm ci
       - name: Rust format
         run: cargo fmt --all --check
       - name: Rust lint
         run: cargo clippy --locked --workspace --all-targets -- -D warnings
-      - name: Tests, protocol check and build
-        run: npm test
+      - name: Rust tests
+        run: npm run test:rust
+      - name: Protocol check
+        run: npm run check:protocol
+      - name: Renderer tests
+        run: npm run test:renderer
+      - name: Electron sidecar tests
+        run: npm run test:electron
+      - name: Production build
+        run: npm run build
       - name: Plugin SDK type check
         run: npx tsc -p packages/plugin-sdk/tsconfig.json
 

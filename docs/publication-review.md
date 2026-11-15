@@ -42,8 +42,8 @@ unofficial; no third-party OAuth client secret is distributed.
 ## Windows corrections
 
 - Resolve native `.exe` names in development and packaged sidecar paths.
-- Compare canonical workspace paths using the same Node resolver, including
-  Windows extended-length paths.
+- Verify workspace directory identity with filesystem device/file identifiers,
+  accepting Windows path aliases while rejecting a different directory.
 - Run real sidecar tests on every CI platform, including spaces and Chinese
   characters in workspace paths.
 - Reject case variants of `.daily`, and on Windows reject alternate data streams

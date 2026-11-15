@@ -1,9 +1,9 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { isDesktopCommand } from "../shared/contracts";
-import { parseIncomingFrame, requestTimeout, SidecarClient, sidecarExecutableName } from "./sidecar";
+import { isSameWorkspaceDirectory, parseIncomingFrame, requestTimeout, SidecarClient, sidecarExecutableName } from "./sidecar";
 
 const cleanupPaths: string[] = [];
 const clients: SidecarClient[] = [];
@@ -50,6 +50,21 @@ describe("sidecar frame validation", () => {
 });
 
 describe("SidecarClient", () => {
+  it("accepts an alias of the same directory and rejects other directories, files and missing roots", async () => {
+    const root = await mkdtemp(join(tmpdir(), "daily-directory-identity-"));
+    cleanupPaths.push(root);
+    const workspace = join(root, "workspace");
+    const other = join(root, "other");
+    const alias = join(root, "alias");
+    await Promise.all([mkdir(workspace), mkdir(other)]);
+    await symlink(workspace, alias, process.platform === "win32" ? "junction" : "dir");
+    await writeFile(join(root, "file.txt"), "fixture");
+    expect(isSameWorkspaceDirectory(workspace, alias)).toBe(true);
+    expect(isSameWorkspaceDirectory(workspace, other)).toBe(false);
+    expect(isSameWorkspaceDirectory(workspace, join(root, "file.txt"))).toBe(false);
+    expect(isSameWorkspaceDirectory(workspace, join(root, "missing"))).toBe(false);
+  });
+
   it("uses the native executable name on each supported platform", () => {
     expect(sidecarExecutableName("win32")).toBe("daily-app-server.exe");
     expect(sidecarExecutableName("darwin")).toBe("daily-app-server");

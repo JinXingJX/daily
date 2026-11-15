@@ -1,7 +1,6 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { EventEmitter } from "node:events";
-import { realpathSync } from "node:fs";
-import { win32 } from "node:path";
+import { realpathSync, statSync } from "node:fs";
 import { createInterface } from "node:readline";
 import { DesktopCommandError, type BackendStatus } from "../shared/contracts";
 
@@ -14,9 +13,16 @@ export function sidecarExecutableName(platform: NodeJS.Platform = process.platfo
   return platform === "win32" ? "daily-app-server.exe" : "daily-app-server";
 }
 
-function canonicalWorkspacePath(path: string): string {
-  const canonical = realpathSync(path);
-  return process.platform === "win32" ? win32.toNamespacedPath(canonical) : canonical;
+/** File identity handles Windows namespaces, drive spelling and directory aliases. */
+export function isSameWorkspaceDirectory(expectedPath: string, actualPath: string): boolean {
+  try {
+    const expected = statSync(expectedPath, { bigint: true });
+    const actual = statSync(actualPath, { bigint: true });
+    return expected.isDirectory() && actual.isDirectory()
+      && expected.ino !== 0n && expected.dev === actual.dev && expected.ino === actual.ino;
+  } catch {
+    return false;
+  }
 }
 // Chat turns return as soon as they are queued and stream progress as events. These plugin
 // methods resolve only when the model or agent task finishes, which can take many model
@@ -58,7 +64,7 @@ export class SidecarClient extends EventEmitter {
   constructor(executable: string, workspacePath: string) {
     super();
     this.executable = executable;
-    this.workspacePath = canonicalWorkspacePath(workspacePath);
+    this.workspacePath = realpathSync(workspacePath);
   }
 
   async start(): Promise<void> {
@@ -249,15 +255,10 @@ export class SidecarClient extends EventEmitter {
         this.abort();
         return;
       }
-      // Rust canonicalization uses the extended-length prefix on Windows. Resolve both
-      // sides with Node before comparing, while still rejecting a different workspace.
-      let workspaceRoot: string | null = null;
-      try {
-        workspaceRoot = canonicalWorkspacePath(frame.workspaceRoot);
-      } catch {
-        // A missing or inaccessible root cannot be the workspace we opened.
-      }
-      if (workspaceRoot !== this.workspacePath) {
+      // Path strings can differ across Rust and Node on Windows. Check that both
+      // names identify the same directory, rather than accepting a spelling match.
+      if (!isSameWorkspaceDirectory(this.workspacePath, frame.workspaceRoot)) {
+        console.error("Sidecar workspace mismatch", { expected: this.workspacePath, actual: frame.workspaceRoot });
         this.emit("fatal", new Error("Local runtime opened an unexpected workspace."));
         this.abort();
         return;
