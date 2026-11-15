@@ -3,11 +3,11 @@
 /**
  * An agent the parent model calls like a tool: its own instructions and a subset of the parent's tools.
  */
-export type AgentToolSpec = { id: string, name: string, description: string, 
+export type AgentToolSpec = { id: string, name: string, description: string,
 /**
  * The sub-agent's system prompt.
  */
-instructions: string, 
+instructions: string,
 /**
  * Ids of parent tools the sub-agent may use.
  */

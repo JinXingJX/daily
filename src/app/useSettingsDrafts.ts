@@ -41,10 +41,11 @@ export function authConfigOptions(configs: AuthConfigView[]): AuthConfigView[] {
 
 /** Providers authenticated with an API key rather than a local client login. */
 export function usesApiKey(kind: ProviderKind) {
-  return kind === "open_ai_compatible" || kind === "anthropic_messages" || kind === "gemini_api";
+  return kind === "open_ai_compatible" || kind === "anthropic_messages" || kind === "gemini_api" || kind === "codex_api_key";
 }
 
-export const API_PROVIDER_DEFAULTS: Record<"open_ai_compatible" | "anthropic_messages" | "gemini_api", { slug: string; name: string; keyEnv: string }> = {
+export const API_PROVIDER_DEFAULTS: Record<"open_ai_compatible" | "anthropic_messages" | "gemini_api" | "codex_api_key", { slug: string; name: string; keyEnv: string }> = {
+  codex_api_key: { slug: "codex-api", name: "Codex API (Responses)", keyEnv: "OPENAI_API_KEY" },
   open_ai_compatible: { slug: "openai", name: "OpenAI compatible", keyEnv: "OPENAI_API_KEY" },
   anthropic_messages: { slug: "anthropic", name: "Anthropic", keyEnv: "ANTHROPIC_API_KEY" },
   gemini_api: { slug: "gemini", name: "Gemini", keyEnv: "GEMINI_API_KEY" },

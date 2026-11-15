@@ -351,7 +351,7 @@ export function AgentSettings({
                   {installedPlugins.length ? (
                     <div className="check-list">
                       {installedPlugins.map((plugin) => {
-                        const mainView = plugin.contributes.views.find((view) => view.location === "main") ?? plugin.contributes.views[0];
+                        const mainView = plugin.contributes.views[0];
                         const Icon = mainView ? pluginViewIcon(mainView) : Plug;
                         return (
                           <label key={plugin.identifier} className="check-list-row">

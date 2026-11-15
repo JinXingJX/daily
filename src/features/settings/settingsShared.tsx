@@ -16,6 +16,7 @@ export const PROVIDER_LABELS: Record<ProviderKind, string> = {
   open_ai_compatible: "OpenAI compatible",
   anthropic_messages: "Anthropic messages",
   gemini_api: "Gemini API",
+  codex_api_key: "Codex API (Responses)",
   codex_login: "Codex Login",
   antigravity_login: "Antigravity Login",
 };

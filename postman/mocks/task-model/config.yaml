@@ -1,0 +1,10 @@
+version: 1
+name: task-model
+slug: task-model
+protocol: http
+port: 4968
+interceptRequests: true
+scenarios:
+  - name: default
+    path: ./default.js
+    default: true

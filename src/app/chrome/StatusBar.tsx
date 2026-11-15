@@ -1,6 +1,7 @@
 import type { BackendStatus } from "@/platform/desktop";
 import { currentLocale, t } from "@/i18n";
 import { localizeHostText } from "@daily/plugin-sdk/hostText";
+import { TaskCenter } from "./TaskCenter";
 
 export type StatusTone = "success" | "warning" | "danger" | "accent" | "neutral";
 
@@ -45,6 +46,7 @@ export function StatusBar({
         </span>
       ) : null}
       <span className="flex-1" />
+      <TaskCenter ready={backendStatus.state === "ready"} />
       <span className="status-bar-item">
         <span className="status-dot" data-tone={authTone} aria-hidden="true" />
         {authLabel}

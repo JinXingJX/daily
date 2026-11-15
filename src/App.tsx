@@ -1,13 +1,12 @@
 import { AlertTriangle, X } from "lucide-react";
 import {
-  lazy,
-  Suspense,
   startTransition,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from "react";
@@ -38,7 +37,6 @@ import { coreRoute, routeIsCore, useAppStore, type AppRoute } from "./useAppStor
 import type { AppEventEnvelope, AppSnapshot, ComposerImage, ContextRootOption } from "./types";
 import { ChatRoute } from "@/app/routes/ChatRoute";
 import { SettingsRoute } from "@/app/routes/SettingsRoute";
-import { RouteLoading } from "@/app/chrome/RouteLoading";
 import { WindowTitlebar } from "@/app/chrome/WindowTitlebar";
 import { BackendBanner } from "@/app/chrome/BackendBanner";
 import { StatusBar } from "@/app/chrome/StatusBar";
@@ -49,11 +47,9 @@ import { errorMessage } from "@/lib/errors";
 import { readLocalPreference, writeLocalPreference } from "@/lib/preferences";
 import type { SettingsSection } from "@/features/settings/SettingsPage";
 import { displaySessionTitle } from "@/features/workspace/sessionTitle";
+import { PluginViews } from "@/features/plugins/PluginViews";
+import { forwardPluginEvents, pluginRuntime } from "@/features/plugins/runtime";
 import { t } from "@/i18n";
-
-const PluginViewHost = lazy(() =>
-  import("@/features/plugins/PluginViewHost").then((module) => ({ default: module.PluginViewHost })),
-);
 
 function App() {
   const workspace = useAppStore((state) => state.workspace);
@@ -86,7 +82,7 @@ function App() {
   const [composerImages, setComposerImages] = useState<ComposerImage[]>([]);
   const [busyCommands, setBusyCommands] = useState<Set<string>>(() => new Set());
   const [retryMessageId, setRetryMessageId] = useState<number | null>(null);
-  const [activePluginDirty, setActivePluginDirty] = useState(false);
+  const pluginsDirty = useSyncExternalStore(pluginRuntime.subscribe, pluginRuntime.isDirty);
   const [inspectorOpen, setInspectorOpen] = useState(() => {
     if (typeof window === "undefined") return false;
     return readLocalPreference("daily:inspector-open") === "true";
@@ -188,11 +184,19 @@ function App() {
   }, [inspectorOpen]);
 
   useEffect(() => {
-    void workspaceDesktop.setDirty(activePluginDirty).catch(() => undefined);
-  }, [activePluginDirty]);
+    void workspaceDesktop.setDirty(pluginsDirty).catch(() => undefined);
+  }, [pluginsDirty]);
+
+  // Plugins run in this window: start the ones that activate at startup, stop the disabled ones.
+  useEffect(() => {
+    forwardPluginEvents();
+    if (plugins) pluginRuntime.sync(plugins.installed);
+  }, [plugins]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      // A plugin view that handled the key keeps it.
+      if (event.defaultPrevented) return;
       const mod = event.metaKey || event.ctrlKey;
       const key = event.key.toLowerCase();
       if (mod && key === "k") {
@@ -255,40 +259,18 @@ function App() {
   const pluginMainViews = useMemo(
     () =>
       (plugins?.installed ?? []).flatMap((plugin) =>
-        plugin.enabled
-          ? plugin.contributes.views
-              .filter((view) => view.location === "main")
-              .map((view) => ({
-                plugin,
-                view,
-              }))
-          : [],
+        plugin.enabled ? plugin.contributes.views.map((view) => ({ plugin, view })) : [],
       ),
     [plugins?.installed],
   );
 
-  const pluginBackgroundViews = useMemo(
-    () =>
-      (plugins?.installed ?? []).flatMap((plugin) =>
-        plugin.enabled
-          ? plugin.contributes.views
-              .filter((view) => view.location === "background")
-              .map((view) => ({ plugin, view }))
-          : [],
-      ),
-    [plugins?.installed],
-  );
 
   const navigateToRoute = useCallback((route: AppRoute) => {
     if (sameRoute(activeRoute, route)) return true;
     if (route.kind === "core" && route.page === "settings") setSettingsEntry("general");
-    if (activePluginDirty && !window.confirm(t("This plugin has unsaved changes. Discard them and leave?"))) {
-      return false;
-    }
-    setActivePluginDirty(false);
     setActiveRoute(route);
     return true;
-  }, [activePluginDirty, activeRoute, setActiveRoute]);
+  }, [activeRoute, setActiveRoute]);
 
   const {
     selectedAuthConfig,
@@ -525,6 +507,11 @@ function App() {
 
         <main className="app-main flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <div className="flex min-h-0 flex-1 overflow-hidden">
+            <PluginViews
+              views={pluginMainViews}
+              active={activePluginView ? { pluginId: activePluginView.plugin.identifier, viewId: activePluginView.view.id } : null}
+              theme={theme}
+            />
             {activeCorePage === "chat" ? (
               <ChatRoute
                 draft={draft}
@@ -543,16 +530,7 @@ function App() {
                 inspectorOpen={inspectorOpen}
                 onCloseInspector={() => setInspectorOpen(false)}
               />
-            ) : activePluginView ? (
-              <Suspense fallback={<RouteLoading label={t("Loading plugin…")} />}>
-                <PluginViewHost
-                  plugin={activePluginView.plugin}
-                  view={activePluginView.view}
-                  theme={theme}
-                  onDirtyChange={setActivePluginDirty}
-                />
-              </Suspense>
-            ) : (
+            ) : activePluginView ? null : (
               <SettingsRoute
                 initialSection={settingsEntry}
                 onBackToApp={() => navigateToRoute(coreRoute("chat"))}
@@ -605,7 +583,14 @@ function App() {
                 }}
                 onScopeSave={() => runUiAction(handleScopeSave())}
                 onSelectAgent={setSelectedAgentId}
-                onReloadPlugins={() => runUiAction(runSnapshotCommand("reload_plugins"))}
+                onReloadPlugins={() =>
+                  runUiAction(
+                    runSnapshotCommand("reload_plugins").then(async (snapshot) => {
+                      await pluginRuntime.reloadChanged();
+                      pluginRuntime.sync(snapshot.plugins.installed);
+                    }),
+                  )
+                }
                 onInstallPlugin={(pluginId) => runUiAction(handleInstallPlugin(pluginId))}
                 onInstallLocalPlugin={(manifestPath, devUrl) =>
                   runUiAction(handleInstallLocalPlugin(manifestPath, devUrl))
@@ -632,16 +617,6 @@ function App() {
         items={commandItems}
         onClose={() => setCommandPaletteOpen(false)}
       />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed -left-[10000px] top-0 h-px w-px overflow-hidden opacity-0"
-      >
-        {pluginBackgroundViews.map(({ plugin, view }) => (
-          <Suspense key={`${plugin.identifier}:${view.id}`} fallback={null}>
-            <PluginViewHost plugin={plugin} view={view} theme={theme} background />
-          </Suspense>
-        ))}
-      </div>
     </div>
   );
 }

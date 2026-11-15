@@ -1,6 +1,9 @@
-// Generated from daily-core `desktop_commands!`. Do not edit; run `npm run gen:protocol`.
+// Generated from daily-desktop-runtime `desktop_commands!`. Do not edit; run `npm run gen:protocol`.
 export const DESKTOP_COMMANDS = [
   "get_app_snapshot",
+  "get_task_runtime_status",
+  "list_workspace_tasks",
+  "workspace_task",
   "reload_settings",
   "get_codex_auth_status",
   "save_codex_auth_settings_content",
@@ -30,7 +33,7 @@ export const DESKTOP_COMMANDS = [
   "disable_plugin",
   "save_plugin_settings",
   "reload_plugins",
-  "plugin_view_asset",
+  "plugin_module",
   "plugin_host_rpc",
   "plugin_rpc_result",
   "run_session_turn",

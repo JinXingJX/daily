@@ -1,10 +1,11 @@
-import { writeFile } from "node:fs/promises";
+import { readFile, stat, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
 import {
   app,
   BrowserWindow,
   dialog,
   shell,
+  session,
   type BrowserWindowConstructorOptions,
   type IpcMainInvokeEvent,
 } from "electron";
@@ -17,7 +18,7 @@ import {
 import { registerDesktopIpc } from "./ipc";
 import { installApplicationMenu } from "./menu";
 import { isSafeDevRendererUrl, isSafeExternalUrl, lockDownSessionPermissions, secureWebPreferences } from "./security";
-import { SidecarClient } from "./sidecar";
+import { SidecarClient, sidecarExecutableName } from "./sidecar";
 import { canonicalDirectory, errorMessage, isDirectory } from "./util";
 import {
   emptyWindowState,
@@ -29,6 +30,7 @@ import {
   type WindowState,
 } from "./windowState";
 import { t } from "./i18n";
+import { PluginModules, pluginContentType } from "./pluginModules";
 
 const RESTART_RESET_MS = 60_000;
 const SETTINGS_COMMANDS = new Set<DesktopCommand>([
@@ -59,10 +61,12 @@ export class WorkspaceWindowManager {
   private stateSaveQueue: Promise<void> = Promise.resolve();
   private settingsQueue: Promise<unknown> = Promise.resolve();
   private quitting = false;
+  private readonly pluginModules = new PluginModules();
 
   async initialize(): Promise<void> {
     this.state = await loadWindowState();
     lockDownSessionPermissions();
+    this.servePluginModules();
     registerDesktopIpc<WorkspaceRecord>({
       workspaceFor: (event) => this.recordForEvent(event),
       workspaceInfo: (record) => ({ path: record.workspacePath, name: basename(record.workspacePath) }),
@@ -72,6 +76,14 @@ export class WorkspaceWindowManager {
       closeWorkspace: (record) => this.confirmAndClose(record),
       setDirty: (record, dirty) => {
         record.dirty = dirty;
+      },
+      pluginModuleUrl: async (record, pluginId) => {
+        const module = await this.invokeCommand(record, "plugin_module", { input: { pluginId } }) as {
+          root: string;
+          entry: string;
+          revision: string;
+        };
+        return this.pluginModules.moduleUrl(module.root, module.entry, module.revision);
       },
     });
     this.installMenu();
@@ -384,6 +396,8 @@ export class WorkspaceWindowManager {
   private async isRunning(record: WorkspaceRecord): Promise<boolean> {
     if ((record.client?.activePluginRuns() ?? 0) > 0) return true;
     try {
+      const tasks = await record.client?.invoke<{ isRunning: boolean }>("get_task_runtime_status");
+      if (tasks?.isRunning) return true;
       const snapshot = await record.client?.invoke<{ runtime?: { isRunning?: boolean } }>("get_app_snapshot");
       return snapshot?.runtime?.isRunning === true;
     } catch {
@@ -410,6 +424,26 @@ export class WorkspaceWindowManager {
     } else {
       await window.loadFile(join(__dirname, "../renderer/index.html"));
     }
+  }
+
+  private servePluginModules(): void {
+    session.defaultSession.protocol.handle("daily-plugin", async (request) => {
+      const file = request.method === "GET" ? this.pluginModules.filePath(request.url) : null;
+      if (!file) return new Response("Not found", { status: 404 });
+      try {
+        const [body, info] = await Promise.all([readFile(file), stat(file)]);
+        return new Response(new Uint8Array(body), {
+          headers: {
+            "content-type": pluginContentType(file),
+            "last-modified": info.mtime.toUTCString(),
+            // The app window imports plugin modules from another origin.
+            "access-control-allow-origin": "*",
+          },
+        });
+      } catch {
+        return new Response("Not found", { status: 404 });
+      }
+    });
   }
 
   private touchRecent(workspacePath: string): void {
@@ -468,8 +502,8 @@ export class WorkspaceWindowManager {
 
 function sidecarExecutable(): string {
   return app.isPackaged
-    ? join(process.resourcesPath, "bin", "daily-app-server")
-    : join(app.getAppPath(), "target", "debug", "daily-app-server");
+    ? join(process.resourcesPath, "bin", sidecarExecutableName())
+    : join(app.getAppPath(), "target", "debug", sidecarExecutableName());
 }
 
 function status(state: BackendStatus["state"], message: string, canRetry = false): BackendStatus {

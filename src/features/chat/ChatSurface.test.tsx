@@ -14,7 +14,7 @@ function view(id: string, kind: AgentEventView["kind"], status: AgentEventView["
 
 const failedTurn: AgentTurnView = {
   id: 7, prompt: "审查插件桥", response: "", strategy: "", status: "failed", partialResponse: "", steps: [],
-  agentAppId: 1, agentName: "Reviewer", pendingAsyncTool: null,
+  agentAppId: 1, agentName: "Reviewer", pendingAsyncTool: null, usage: null, errorCode: null,
   eventViews: [
     view("prompt", "user_input", "completed"),
     view("think", "llm_thought", "completed", { content: "先搜索 IPC 入口" }),

@@ -48,7 +48,7 @@ export function PluginSettings({
     <section className="flex flex-col gap-5">
       <SettingsHeader
         title={t("Plugins")}
-        detail={t("Plugins run in sandboxed views and can use every host capability (network, storage, workspace, models and agents). Install only plugins you trust.")}
+        detail={t("Plugins run inside the app window and can use every host capability (network, storage, workspace, models and agents). Install only plugins you trust.")}
         action={
           <div className="flex gap-2">
             <Button variant="secondary" size="sm" disabled={busyCommand === "reload_plugins"} onClick={onReloadPlugins}>
@@ -183,10 +183,11 @@ export function PluginCard({
   onUninstall: () => void;
   onEnabledChange: (enabled: boolean) => void;
 }) {
-  const mainView = plugin.contributes.views.find((view) => view.location === "main") ?? plugin.contributes.views[0];
+  const mainView = plugin.contributes.views[0];
   const Icon = mainView ? pluginViewIcon(mainView) : Plug;
   const tone = mainView ? pluginViewTone(mainView) : "neutral";
-  const views = plugin.contributes.views.map((view) => (view.location === "background" ? t("{title} (background)", { title: view.title }) : view.title));
+  const views = plugin.contributes.views.map((view) => view.title);
+  if (plugin.activation === "startup") views.push(t("Background work"));
   const panelId = `plugin-${plugin.identifier}`;
 
   return (

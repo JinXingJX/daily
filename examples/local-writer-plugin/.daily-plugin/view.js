@@ -1,6 +1,8 @@
-(function () {
-  const root = document.getElementById("root");
-  const sdk = window.dailyPlugin;
+let sdk;
+export default {
+  activate(host) { sdk = host; },
+  views: {
+    "writer-lab.canvas": { mount(root) {
   let draft = "";
   let output = "Open this canvas from the Daily sidebar.";
 
@@ -34,8 +36,8 @@
     </main>
     <style>
       * { box-sizing: border-box; }
-      body { margin: 0; background: #111; color: #f4f4f5; }
-      .shell { display: grid; grid-template-columns: 18rem minmax(18rem, 1fr) minmax(22rem, 34rem); height: 100vh; }
+      :host { margin: 0; background: #111; color: #f4f4f5; }
+      .shell { display: grid; grid-template-columns: 18rem minmax(18rem, 1fr) minmax(22rem, 34rem); height: 100cqh; }
       .rail { border-right: 1px solid #2a2a2f; padding: 24px; background: #18181b; }
       .kicker { color: #a1a1aa; font-size: 11px; font-weight: 700; letter-spacing: 0; text-transform: uppercase; }
       h1 { margin: 8px 0 24px; font-size: 28px; line-height: 1.1; }
@@ -50,12 +52,12 @@
       .editor { display: grid; grid-template-rows: minmax(12rem, 1fr) minmax(12rem, 1fr); border-left: 1px solid #2a2a2f; background: #18181b; }
       textarea { width: 100%; height: 100%; resize: none; border: 0; border-bottom: 1px solid #2a2a2f; outline: none; background: #18181b; color: #fafafa; padding: 20px; line-height: 1.6; }
       pre { margin: 0; overflow: auto; white-space: pre-wrap; padding: 20px; color: #d4d4d8; line-height: 1.6; }
-      @media (max-width: 900px) { .shell { grid-template-columns: 1fr; grid-template-rows: auto 22rem minmax(24rem, 1fr); } .rail, .editor { border: 0; } }
+      @container daily-view (max-width: 900px) { .shell { grid-template-columns: 1fr; grid-template-rows: auto 22rem minmax(24rem, 1fr); } .rail, .editor { border: 0; } }
     </style>
   `;
 
-  const draftEl = document.getElementById("draft");
-  const outputEl = document.getElementById("output");
+  const draftEl = root.querySelector("#draft");
+  const outputEl = root.querySelector("#output");
 
   function render() {
     draftEl.value = draft;
@@ -66,7 +68,7 @@
     try {
       draft = (await sdk.storage.get("draft")) || "";
       const context = await sdk.host.getContext();
-      output = `Connected to ${context.plugin.name}. Available agents: ${context.agents.length}`;
+      output = `Connected to ${context.plugin.name}. Available agents: ${(await sdk.agent.list()).length}`;
     } catch (error) {
       output = error.message;
     }
@@ -77,7 +79,7 @@
     draft = draftEl.value;
   });
 
-  document.getElementById("save").addEventListener("click", async function () {
+  root.querySelector("#save").addEventListener("click", async function () {
     try {
       await sdk.storage.set("draft", draft);
       output = "Draft saved to plugin-private project storage.";
@@ -87,7 +89,7 @@
     render();
   });
 
-  document.getElementById("model").addEventListener("click", async function () {
+  root.querySelector("#model").addEventListener("click", async function () {
     output = "Thinking...";
     render();
     try {
@@ -103,7 +105,7 @@
     render();
   });
 
-  document.getElementById("agent").addEventListener("click", async function () {
+  root.querySelector("#agent").addEventListener("click", async function () {
     output = "Running agent...";
     render();
     try {
@@ -119,4 +121,7 @@
   });
 
   boot();
-})();
+    return () => root.replaceChildren();
+    } },
+  },
+};

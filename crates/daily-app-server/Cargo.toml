@@ -8,7 +8,7 @@ repository.workspace = true
 description = "JSONL stdio server for Daily desktop clients"
 
 [dependencies]
-daily-core = { path = "../daily-core" }
+daily-desktop-runtime = { path = "../daily-desktop-runtime" }
 serde.workspace = true
 serde_json.workspace = true
 tokio.workspace = true

@@ -106,7 +106,7 @@ export function AuthSettings({
     <section>
       <SettingsHeader
         title={t("Model providers")}
-        detail={t("Use an API key (OpenAI compatible, Anthropic, Gemini) or reuse a local Codex / Antigravity sign-in. Saving makes it the default model.")}
+        detail={t("Use an API key (Codex Responses, OpenAI compatible, Anthropic, Gemini) or reuse a local Codex / Antigravity sign-in. Saving makes it the default model.")}
         action={
           <div className="flex gap-2">
             <Select value="" onValueChange={(kind) => apiProvider.onAdd(kind as keyof typeof API_PROVIDER_DEFAULTS)}>
@@ -214,7 +214,7 @@ export function AuthSettings({
               <>
                 <Field label="Base URL">
                   <Input
-                    placeholder={t("Leave empty for the official endpoint")}
+                    placeholder={authProviderDraft === "codex_api_key" ? "https://api.openai.com/v1" : t("Leave empty for the official endpoint")}
                     value={authBaseUrlDraft}
                     onChange={(event) => setAuthBaseUrlDraft(event.currentTarget.value)}
                   />

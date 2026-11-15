@@ -12,22 +12,23 @@ Daily 是一个本地桌面工作台，用来让 AI 智能体在你电脑上的�
 ## 功能
 
 - **持久化的任务**：每个工作区把对话、轮次、工具调用和记忆保存在 `<workspace>/.daily/` 下，多个会话可以同时运行。
-- **可追溯的运行过程**：每一次模型请求、工具调用和结果都记录为可展开的步骤；失败或被停止的轮次可以从断点继续。
-- **自带模型**：支持 OpenAI 兼容接口（OpenAI、本地服务、网关）、Anthropic 和 Gemini 的 API Key；另有可选的非官方适配器，复用本机 Codex CLI 或 Antigravity 的登录。
+- **可追溯的运行过程**：每一次模型请求、工具调用和结果都记录为可展开的步骤，并显示每轮用掉的 token；失败或被停止的轮次可以从断点继续。
+- **自带模型**：支持 OpenAI 兼容接口（OpenAI、本地服务、网关）、Anthropic 和 Gemini 的 API Key，均使用原生工具调用和流式输出；另有可选的非官方适配器，复用本机 Codex CLI 或 Antigravity 的登录。
 - **智能体与钩子**：为智能体单独配置模型、提示词、上下文目录和插件；用 `@智能体名` 指定由谁处理，并在每轮开始前或完成后自动运行其他智能体。
-- **工作区工具**：智能体可以列出、读取和搜索工作区文件（只读，私有的 `.daily` 目录对其不可见）。
+- **工作区工具**：智能体可以列出、读取和搜索工作区文件（只读，私有的 `.daily` 目录对其不可见），同一步里的多次读取会并行执行。
+- **独立的多智能体 SDK**：[`daily-agent-core`](crates/daily-agent-core) 提供运行管理、串行/并行/DAG 编排、递归代理、共享预算和版本化检查点；[`daily-agent-providers`](crates/daily-agent-providers) 提供模型协议。运行 `cargo run -p daily-agent-core --example framework` 可离线体验。桌面端保留 `daily_core::sdk` 兼容入口。
 - **插件**：插件可以提供沙箱视图（主视图或后台视图）、内联渲染器和智能体工具，并通过类型化 SDK 使用宿主能力：存储、工作区文件、网络请求、模型调用，以及可在工具处暂停与恢复的结构化智能体任务。
 - **中英文界面**。
 
 ## 状态
 
-Daily 仍处于早期阶段。目前只在 Apple Silicon 的 macOS 上测试过；构建产物未签名，也没有自动更新。1.0 之前磁盘数据格式可能发生不兼容的变化。
+Daily 仍处于早期阶段。本地验证使用 Apple Silicon macOS，CI 覆盖 Linux、macOS 和 Windows；构建产物未签名，也没有自动更新。1.0 之前磁盘数据格式可能发生不兼容的变化。
 
 ## 快速开始
 
 环境要求：
 
-- Apple Silicon 上的 macOS 14 及以上（其他平台未测试）
+- Windows 10/11 x64，或 Apple Silicon 上的 macOS 14 及以上
 - Node.js 22.12 及以上（仓库包含 `.nvmrc`）
 - 当前稳定版 Rust 工具链（[rustup](https://rustup.rs)）
 - Xcode 命令行工具（`xcode-select --install`）
@@ -35,11 +36,13 @@ Daily 仍处于早期阶段。目前只在 Apple Silicon 的 macOS 上测试过�
 ```bash
 git clone https://github.com/JinXingJX/daily.git
 cd daily
-npm install
+npm ci
 npm run dev
 ```
 
 `npm run dev` 会以调试模式构建 Rust sidecar，并启动带热更新的 Electron。首次启动时会让你选择一个工作区目录，之后会自动恢复上次打开的窗口。
+
+App、Core、Writer、Timeline 的完整安装步骤见 [Windows 使用指南](docs/windows.md)。构建两个插件时，主应用的本地目录需命名为 `daliy`。
 
 ## 配置模型
 
@@ -84,9 +87,11 @@ Daily 也可以复用本机已安装的 Codex CLI 或 Antigravity 2.x 客户端�
 
 ```text
 React 渲染进程 ──contextBridge──▶ Electron 主进程 ──stdio 上的 JSONL──▶ daily-app-server
-沙箱插件 iframe ──postMessage──┘                                          │
+可信插件 ES 模块 ──直接宿主 API──┘                                          │
                                                                           ▼
-                                  daily-core：智能体循环、模型提供商、插件、设置、持久化
+                                  daily-desktop-runtime：桌面插件、设置、会话、持久化
+                                      ├── daily-agent-core：agent SDK
+                                      └── daily-agent-providers：模型通信 → agent SDK
 ```
 
 每个工作区窗口对应一个独立的 sidecar 进程。详见 [docs/architecture.md](docs/architecture.md) 与 [docs/protocol.md](docs/protocol.md)。
@@ -100,8 +105,10 @@ React 渲染进程 ──contextBridge──▶ Electron 主进程 ──stdio �
 | `npm test` | Rust 测试、协议检查、渲染进程与 Electron 测试、生产构建 |
 | `npm run typecheck` | 检查渲染进程、主进程和 preload 的类型 |
 | `npm run gen:protocol` | 从 Rust 重新生成 TypeScript 协议类型、IPC 白名单和 SDK 方法列表 |
+| `npm run package:agent-sdk` | 验证并打包独立 Rust SDK 源码 |
 | `cargo test --workspace` | 只运行 Rust 测试 |
 | `cargo clippy --workspace --all-targets -- -D warnings` | 严格的 Rust 静态检查 |
+| `npm run package:win` | 在 `release/` 中构建未签名的 Windows x64 NSIS 安装包 |
 | `npm run package:mac` | 在 `release/` 中构建未签名的 Apple Silicon ZIP 和 DMG |
 
 做自动化界面检查时，开发构建支持 `DAILY_WORKSPACE=/absolute/path`（直接打开该工作区）和 `DAILY_CAPTURE_PATH=/tmp/shot.png`（加载后保存截图）。
@@ -110,10 +117,13 @@ React 渲染进程 ──contextBridge──▶ Electron 主进程 ──stdio �
 
 ## 已知限制
 
-- 目前只构建并测试了 Apple Silicon 上的 macOS，构建产物未签名。
+- 构建产物未签名。Windows CI 验证原生构建和 sidecar 行为，交互界面仍需 Windows 实机验收。
+- Antigravity 登录依赖 macOS 钥匙串，Windows 请使用 API Key 提供商。
 - 智能体系统提示词和内置模型提示词为英文。
 - 插件市场目前只是静态示例列表。
 - 每个工作区最多同时运行 4 个会话。
+- 内置的智能体工具只能读取工作区。没有 MCP 客户端，也没有内置的写文件或执行命令的工具；插件可以提供自己的工具。
+- 历史和工具结果的 token 预算是估算值，没有使用各服务商的分词器精确计数。
 
 ## 免责声明
 

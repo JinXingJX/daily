@@ -1,4 +1,4 @@
-use daily_core::DailyRuntime;
+use daily_desktop_runtime::DailyRuntime;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::io::{self, Write};

@@ -54,7 +54,7 @@ The sidecar cannot continue (for example the workspace failed to load). Electron
 
 ## Commands
 
-The allowlist is generated from the `desktop_commands!` table in `crates/daily-core/src/runtime/mod.rs` into `electron/shared/commands.generated.ts`. Electron forwards only these names.
+The allowlist is generated from the `desktop_commands!` table in `crates/daily-desktop-runtime/src/runtime/mod.rs` into `electron/shared/commands.generated.ts`. Electron forwards only these names.
 
 | Group | Commands |
 | --- | --- |
@@ -68,7 +68,7 @@ The allowlist is generated from the `desktop_commands!` table in `crates/daily-c
 
 Commands that change state return the new `AppSnapshot` and also broadcast it as an `app://state` event. Turn commands return as soon as the turn is queued; progress arrives as `turn_delta` events.
 
-`plugin_host_rpc` carries a plugin call: `{ "pluginId", "viewId", "method", "payload" }`. Methods are listed in `PLUGIN_RPC_METHODS` (`crates/daily-core/src/plugins/rpc/mod.rs`, generated into `packages/plugin-sdk/src/methods.generated.ts`).
+`plugin_host_rpc` carries a plugin call: `{ "pluginId", "viewId", "method", "payload" }`. Methods are listed in `PLUGIN_RPC_METHODS` (`crates/daily-desktop-runtime/src/plugins/rpc/mod.rs`, generated into `packages/plugin-sdk/src/methods.generated.ts`).
 
 ## Error codes
 

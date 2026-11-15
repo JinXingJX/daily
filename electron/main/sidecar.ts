@@ -8,11 +8,16 @@ const PROTOCOL_VERSION = 1;
 const MAX_FRAME_BYTES = 32 * 1024 * 1024;
 const READY_TIMEOUT_MS = 15_000;
 const REQUEST_TIMEOUT_MS = 30_000;
+
+export function sidecarExecutableName(platform: NodeJS.Platform = process.platform): string {
+  return platform === "win32" ? "daily-app-server.exe" : "daily-app-server";
+}
 // Chat turns return as soon as they are queued and stream progress as events. These plugin
 // methods resolve only when the model or agent task finishes, which can take many model
 // requests; they get no client deadline. The sidecar bounds each model request, plugins can
 // stop or cancel a run, and a sidecar exit rejects every pending request.
 const LONG_RUNNING_PLUGIN_METHODS = new Set([
+  "image.generate",
   "agent.run",
   "agent.task.resume",
   "agent.task.retry",
@@ -237,7 +242,15 @@ export class SidecarClient extends EventEmitter {
         this.abort();
         return;
       }
-      if (frame.workspaceRoot !== this.workspacePath) {
+      // Rust canonicalization uses the extended-length prefix on Windows. Resolve both
+      // sides with Node before comparing, while still rejecting a different workspace.
+      let workspaceRoot: string | null = null;
+      try {
+        workspaceRoot = realpathSync(frame.workspaceRoot);
+      } catch {
+        // A missing or inaccessible root cannot be the workspace we opened.
+      }
+      if (workspaceRoot !== this.workspacePath) {
         this.emit("fatal", new Error("Local runtime opened an unexpected workspace."));
         this.abort();
         return;

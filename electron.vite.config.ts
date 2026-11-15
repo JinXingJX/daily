@@ -7,12 +7,8 @@ const developmentCsp = {
   name: "daily-development-csp",
   apply: "serve" as const,
   transformIndexHtml(html: string) {
-    return html
-      .replace("script-src 'self';", "script-src 'self' 'unsafe-inline';")
-      .replace(
-        "connect-src 'self';",
-        "connect-src 'self' ws://127.0.0.1:* ws://localhost:*;",
-      );
+    // Vite injects an inline Fast Refresh preamble into the development page.
+    return html.replace("script-src 'self'", "script-src 'self' 'unsafe-inline'");
   },
 };
 

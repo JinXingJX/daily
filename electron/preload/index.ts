@@ -40,6 +40,11 @@ const desktopApi = {
       return ipcRenderer.invoke("daily:backend-retry");
     },
   },
+  plugins: {
+    moduleUrl(pluginId: string): Promise<string> {
+      return ipcRenderer.invoke("daily:plugin-module-url", pluginId);
+    },
+  },
 } as const;
 
 contextBridge.exposeInMainWorld("dailyDesktop", desktopApi);

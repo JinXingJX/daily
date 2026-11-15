@@ -3,10 +3,11 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { isDesktopCommand } from "../shared/contracts";
-import { parseIncomingFrame, requestTimeout, SidecarClient } from "./sidecar";
+import { parseIncomingFrame, requestTimeout, SidecarClient, sidecarExecutableName } from "./sidecar";
 
 const cleanupPaths: string[] = [];
 const clients: SidecarClient[] = [];
+const executable = process.env.DAILY_TEST_SIDECAR ?? resolve("target/debug", sidecarExecutableName());
 
 afterEach(async () => {
   await Promise.all(clients.splice(0).map((client) => client.shutdown()));
@@ -29,11 +30,12 @@ describe("desktop command contract", () => {
 
 describe("request timeouts", () => {
   it("gives long-running plugin RPCs no deadline, reading the renderer's input envelope", () => {
-    expect(requestTimeout("plugin_host_rpc", { input: { pluginId: "p", viewId: "v", method: "model.invoke", payload: {} } })).toBeNull();
-    expect(requestTimeout("plugin_host_rpc", { input: { pluginId: "p", viewId: "v", method: "agent.task.resume", payload: {} } })).toBeNull();
-    expect(requestTimeout("plugin_host_rpc", { input: { pluginId: "p", viewId: "v", method: "agent.task.retry", payload: {} } })).toBeNull();
-    expect(requestTimeout("plugin_host_rpc", { input: { pluginId: "p", viewId: "v", method: "plugin.files.readText", payload: {} } })).toBe(30_000);
-    expect(requestTimeout("plugin_host_rpc", { input: { pluginId: "p", viewId: "v", method: "agent.session.get", payload: {} } })).toBe(30_000);
+    expect(requestTimeout("plugin_host_rpc", { input: { pluginId: "p", method: "model.invoke", payload: {} } })).toBeNull();
+    expect(requestTimeout("plugin_host_rpc", { input: { pluginId: "p", method: "agent.task.resume", payload: {} } })).toBeNull();
+    expect(requestTimeout("plugin_host_rpc", { input: { pluginId: "p", method: "agent.task.retry", payload: {} } })).toBeNull();
+    expect(requestTimeout("plugin_host_rpc", { input: { pluginId: "p", method: "image.generate", payload: {} } })).toBeNull();
+    expect(requestTimeout("plugin_host_rpc", { input: { pluginId: "p", method: "plugin.files.readText", payload: {} } })).toBe(30_000);
+    expect(requestTimeout("plugin_host_rpc", { input: { pluginId: "p", method: "agent.session.get", payload: {} } })).toBe(30_000);
     expect(requestTimeout("run_session_turn", {})).toBe(30_000);
   });
 });
@@ -47,11 +49,16 @@ describe("sidecar frame validation", () => {
   });
 });
 
-describe.skipIf(process.platform !== "darwin")("SidecarClient", () => {
+describe("SidecarClient", () => {
+  it("uses the native executable name on each supported platform", () => {
+    expect(sidecarExecutableName("win32")).toBe("daily-app-server.exe");
+    expect(sidecarExecutableName("darwin")).toBe("daily-app-server");
+    expect(sidecarExecutableName("linux")).toBe("daily-app-server");
+  });
+
   it("handshakes, correlates responses, forwards events, and reports command errors", async () => {
-    const workspacePath = await mkdtemp(join(tmpdir(), "daily-sidecar-test-"));
+    const workspacePath = await mkdtemp(join(tmpdir(), "daily sidecar 中文-"));
     cleanupPaths.push(workspacePath);
-    const executable = resolve("target/debug/daily-app-server");
     const client = new SidecarClient(executable, workspacePath);
     clients.push(client);
 
@@ -77,7 +84,7 @@ describe.skipIf(process.platform !== "darwin")("SidecarClient", () => {
   it("waits for readiness when a request arrives while the runtime is still starting", async () => {
     const workspacePath = await mkdtemp(join(tmpdir(), "daily-sidecar-test-"));
     cleanupPaths.push(workspacePath);
-    const client = new SidecarClient(resolve("target/debug/daily-app-server"), workspacePath);
+    const client = new SidecarClient(executable, workspacePath);
     clients.push(client);
     const starting = client.start();
     const snapshot = await client.invoke<{ workspace: { rootId: number } }>("get_app_snapshot");

@@ -8,6 +8,7 @@ import {
 } from "../../electron/shared/contracts";
 
 export type DailyDesktopApi = {
+  plugins: { moduleUrl(pluginId: string): Promise<string> };
   invoke<T>(command: DesktopCommand, args?: unknown): Promise<InvokeResult<T>>;
   onAppEvent(listener: (message: AppEventMessage) => void): () => void;
   onBackendStatus(listener: (status: BackendStatus) => void): () => void;
@@ -59,6 +60,11 @@ export const workspaceDesktop = {
 
 export const backendDesktop = {
   retry: () => desktop().backend.retry(),
+};
+
+export const pluginsDesktop = {
+  /** URL the plugin's built entry module is imported from. */
+  moduleUrl: (pluginId: string) => desktop().plugins.moduleUrl(pluginId),
 };
 
 export { DesktopCommandError };

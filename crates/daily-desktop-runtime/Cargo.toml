@@ -1,0 +1,25 @@
+[package]
+name = "daily-desktop-runtime"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+description = "Daily desktop backend: sessions, settings, plugins and command surface"
+
+[dependencies]
+daily-agent-core = { version = "0.1.0", path = "../daily-agent-core" }
+daily-agent-providers = { version = "0.1.0", path = "../daily-agent-providers", features = ["login"] }
+async-trait.workspace = true
+base64.workspace = true
+futures-util.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+ts-rs = { version = "12", optional = true, features = ["serde-json-impl", "no-serde-warnings"] }
+rusqlite = { version = "0.41.1", features = ["bundled"] }
+
+[features]
+ts = ["dep:ts-rs", "daily-agent-core/ts", "daily-agent-providers/ts"]

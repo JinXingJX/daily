@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/daily-core", "crates/daily-app-server"]
+members = ["crates/daily-agent-core", "crates/daily-agent-providers", "crates/daily-core", "crates/daily-desktop-runtime", "crates/daily-app-server"]
 resolver = "2"
 
 [workspace.package]

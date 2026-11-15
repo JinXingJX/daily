@@ -98,6 +98,25 @@ export function ActivityPanel({
                     {progress.completed} / {progress.steps.length}
                   </div>
                 </div>
+                {latestTurn.usage ? (
+                  <>
+                    <div>
+                      <div className="stat-label">{t("Input tokens")}</div>
+                      <div
+                        className="stat-value mono"
+                        title={t("{count} read from the provider's cache", {
+                          count: latestTurn.usage.cachedInputTokens.toLocaleString(),
+                        })}
+                      >
+                        {latestTurn.usage.inputTokens.toLocaleString()}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="stat-label">{t("Output tokens")}</div>
+                      <div className="stat-value mono">{latestTurn.usage.outputTokens.toLocaleString()}</div>
+                    </div>
+                  </>
+                ) : null}
               </div>
 
               <section className="flex flex-col gap-2">

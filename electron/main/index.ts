@@ -1,9 +1,13 @@
-import { app, BrowserWindow, dialog } from "electron";
+import { app, BrowserWindow, dialog, protocol } from "electron";
 import { errorMessage } from "./util";
 import { WorkspaceWindowManager } from "./workspaceManager";
 import { t } from "./i18n";
 
 const manager = new WorkspaceWindowManager();
+// Plugin modules are imported into the app window from their own folder origins.
+protocol.registerSchemesAsPrivileged([
+  { scheme: "daily-plugin", privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, codeCache: true } },
+]);
 let quitRequested = false;
 
 app.whenReady().then(() => manager.initialize()).catch((error) => {

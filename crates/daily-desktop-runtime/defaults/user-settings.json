@@ -1,0 +1,46 @@
+{
+  "agent": {
+    "maxIterations": 100,
+    "dialogueWindow": 8,
+    "memoryWindow": 16
+  },
+  "model": {
+    "model": "gpt-5.5",
+    "temperature": 0.2,
+    "maxOutputTokens": 32000
+  },
+  "auth": {
+    "selectedAuthConfigId": "codex-default",
+    "configs": [
+      {
+        "id": "codex-default",
+        "name": "Codex",
+        "providerKind": "codex_login",
+        "baseUrl": "https://chatgpt.com/backend-api/codex",
+        "codexHome": "",
+        "models": [
+          "gpt-5.5",
+          "gpt-5.5-low",
+          "gpt-5.5-medium",
+          "gpt-5.5-high",
+          "gpt-5.5-xhigh",
+          "gpt-5.4",
+          "gpt-5.4-low",
+          "gpt-5.4-medium",
+          "gpt-5.4-high",
+          "gpt-5.4-xhigh",
+          "gpt-5.4-mini",
+          "gpt-5.4-mini-low",
+          "gpt-5.4-mini-medium",
+          "gpt-5.4-mini-high",
+          "gpt-5.4-mini-xhigh",
+          "gpt-5.3-codex",
+          "gpt-5.2",
+          "codex-auto-review"
+        ],
+        "defaultModel": "gpt-5.5",
+        "followCodex": true
+      }
+    ]
+  }
+}

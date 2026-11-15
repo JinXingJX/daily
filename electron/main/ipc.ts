@@ -18,6 +18,8 @@ export type DesktopIpcHost<Workspace> = {
   retryBackend(workspace: Workspace): Promise<void>;
   closeWorkspace(workspace: Workspace): Promise<void>;
   setDirty(workspace: Workspace, dirty: boolean): void;
+  /** URL the renderer imports the plugin's built entry module from. */
+  pluginModuleUrl(workspace: Workspace, pluginId: string): Promise<string>;
 };
 
 /**
@@ -46,6 +48,11 @@ export function registerDesktopIpc<Workspace>(host: DesktopIpcHost<Workspace>): 
     );
   });
   ipcMain.handle("daily:workspace-current", (event) => host.workspaceInfo(host.workspaceFor(event)));
+  ipcMain.handle("daily:plugin-module-url", (event, pluginId: unknown) => {
+    const workspace = host.workspaceFor(event);
+    if (typeof pluginId !== "string") throw new Error("Plugin id must be a string.");
+    return host.pluginModuleUrl(workspace, pluginId);
+  });
   ipcMain.handle("daily:workspace-open", (event) => {
     host.workspaceFor(event);
     return host.chooseWorkspace(event);

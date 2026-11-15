@@ -1,0 +1,64 @@
+purpose:
+  stands_in_for: A local Chat Completions provider with deterministic output, five-second latency and a request counter.
+  unblocks: Electron module-plugin switching and durable Writer task recovery without real provider calls.
+assumptions:
+  - id: local-stream-envelope
+    status: supported
+    claim: The local stand-in supports the streaming response consumed by the current OpenAI-compatible adapter.
+    reason: The real Writer handler completed with the SSE delta and finish envelope emitted by this mock.
+    verification: On 2026-11-12, the initial run failed with empty content against the earlier JSON-only mock. After adding SSE for stream requests, the Electron scenario completed and the simulation recorded HTTP 200 calls with five-second latency. This establishes compatibility with this stand-in only, not a live provider.
+    source: postman/mocks/task-model/default.js; crates/daily-core/src/model/openai.rs; scripts/test-task-runtime.mjs; /private/tmp/daily-plugin-sim-4969.ndjson
+    updated_at: '2026-11-12'
+  - id: route-switch-retains-worker
+    status: supported
+    claim: Switching routes retains the plugin view and allows the activation-owned Writer handler to complete.
+    reason: The scenario retained the same editor DOM and input while the real handler awaited the local model.
+    verification: On 2026-11-12, observed the retained view hide and reappear with its editor identity and text intact, then checked completed task and persisted session output. The final run also loaded the real built module chunks, restored editor focus, and changed the theme without rebuilding the editor. The earlier record said navigation removes the main iframe while a separate worker continues; that was evidence for the former architecture and no longer describes the module runtime.
+    source: scripts/test-task-runtime.mjs; src/features/plugins/PluginViews.tsx; /private/tmp/daily-plugin-sim-4969.ndjson
+    updated_at: '2026-11-12'
+  - id: renderer-reload-recovery
+    status: supported
+    claim: Explicit recovery after a renderer reload reuses the journaled model result without another model request in the tested scenario.
+    reason: The second attempt completed with two session entries and an unchanged external-operation count after retry.
+    verification: On 2026-11-12, reloaded the shared renderer after the local stand-in received the request, waited for the lease to expire as interrupted, retried, and observed attempt 2 complete. The request counter increased once for this task. Historical claims that visible-renderer reload preserves an independent worker and that a worker-only crash is restarted applied to the previous design; the shared renderer now stops plugin execution until recovery.
+    source: scripts/test-task-runtime.mjs; packages/plugin-sdk/src/tasks.ts; crates/daily-core/src/tasks.rs; /private/tmp/daily-plugin-sim-4969.ndjson
+    updated_at: '2026-11-12'
+  - id: live-provider-behavior
+    status: unknown
+    claim: A real configured provider has the availability and response quality represented by the local stand-in.
+    reason: No live provider was called; the mock is repository-authored and no owner-published mock was fetched. CLI status is unavailable in Postman 1.75.0 and the simulation ran locally without history.
+    verification: Historical and current runs cover the local stand-in only. Provider availability and output quality require separate live evidence. A sidecar crash during an external call still leaves an uncertain external outcome and is not automatically replayed.
+    source: postman/mocks/task-model/default.js; crates/daily-core/src/tasks.rs; docs/task-runtime.md
+    updated_at: '2026-11-12'
+  - id: extracted-agent-sdk-provider-path
+    status: supported
+    claim: The extracted agent core and default HTTP provider binding consume this local stand-in's streaming response.
+    reason: The standalone provider example returned the fixture content through daily-agent-core and ProviderModel; the simulation recorded the matching HTTP 200 request.
+    verification: On 2026-11-14, ran cargo run -p daily-agent-providers --example local_model against http://127.0.0.1:4972/model/v1. Observed the fixture reply and a POST /v1/chat/completions with HTTP 200. Also ran the separate offline Cargo consumer, which executed delegation without desktop dependencies or the login feature. This establishes the local path only, not live provider availability.
+    source: crates/daily-agent-providers/src/bound.rs; crates/daily-agent-providers/examples/local_model.rs; scripts/check-agent-sdk.mjs; /private/tmp/daily-sdk-simulation.ndjson
+    updated_at: '2026-11-14'
+  - id: desktop-recovery-after-sdk-extraction
+    status: supported
+    claim: Desktop Writer task recovery retains the journaled model result after the SDK/provider extraction in the tested renderer-reload scenario.
+    reason: The real Electron scenario completed both tasks, recovered after renderer reload, retained two session entries and reported no duplicate model calls.
+    verification: On 2026-11-14, ran DAILY_TASK_QA_MODEL_URL=http://127.0.0.1:4972/model npm run test:task-runtime. Observed completed status, retained view and editor focus, theme changes without remount, rendererReloadRecovered=true and noDuplicateModelCalls=true. The simulation recorded two scenario model POSTs in addition to the earlier standalone SDK probe; this verifies the repository-authored stand-in only.
+    source: scripts/test-task-runtime.mjs; crates/daily-core/src/agent/sdk/run_loop.rs; crates/daily-agent-core/src/run_loop.rs; /private/tmp/daily-sdk-simulation.ndjson
+    updated_at: '2026-11-14'
+  - id: framework-runtime-migration-20261114
+    status: supported
+    claim: The SDK framework and renamed desktop runtime preserve local provider streaming and Writer recovery after the full refactor.
+    reason: The Electron scenario completed with retained views, rendererReloadRecovered=true, noDuplicateModelCalls=true and two session entries; the standalone provider example also returned the local fixture.
+    verification: On 2026-11-14, ran the Electron task-runtime scenario against port 4972 after moving desktop ownership to daily-desktop-runtime. Then ran the standalone local_model example. The simulation recorded three successful model POSTs in total (two scenario requests and one SDK probe). Separate offline Rust fault-injection tests cover recursive agent restoration, completed-child graph reconciliation after a failed graph write, SQLite workflow revision fencing, shared sibling budgets and completed-result reuse. No live provider was called.
+    source: crates/daily-desktop-runtime/src/agent_checkpoints.rs; crates/daily-desktop-runtime/src/agent/sdk/run_loop.rs; crates/daily-agent-core/src/framework_tests.rs; scripts/test-task-runtime.mjs; /private/tmp/daily-sdk-simulation.ndjson
+    updated_at: '2026-11-14'
+fingerprints:
+  - id: module-runtime-20261112
+    date: '2026-11-12'
+    commit: 15fec746c2f643dd9832699f0cb2a13ee7cf0f76
+    cli: Postman 1.75.0; dirty working tree with module-plugin migration
+  - id: agent-sdk-extraction-20261114
+    date: '2026-11-14'
+    cli: Postman 1.75.0; local simulation on port 4972; dirty working tree with agent SDK extraction
+  - id: agent-framework-desktop-runtime-20261114
+    date: '2026-11-14'
+    cli: Postman 1.75.0; local port 4972; dirty working tree with supervision, workflows and desktop-runtime migration

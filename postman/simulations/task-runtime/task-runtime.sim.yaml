@@ -1,0 +1,6 @@
+simulation: daily-task-runtime
+routing: path
+mocks:
+  - name: model
+    routeKey: model
+    path: postman/mocks/task-model/config.yaml

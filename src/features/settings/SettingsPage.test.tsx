@@ -46,20 +46,25 @@ describe("authentication settings", () => {
     expect(html).toContain("非官方实现");
   });
 
-  it("shows API key fields without login controls for key-based providers", () => {
+  it.each(["open_ai_compatible", "codex_api_key"] as const)("shows API key fields without login controls for %s", (kind) => {
     const fixture = props();
     fixture.authConfigOptions = [
       ...fixture.authConfigOptions,
-      { id: "openai", name: "OpenAI", providerKind: "open_ai_compatible", baseUrl: "", codexHome: null, models: ["gpt-4.1"], defaultModel: "gpt-4.1", followCodex: false },
+      { id: "api", name: "API", providerKind: kind, baseUrl: "", codexHome: null, models: ["gpt-5.5"], defaultModel: "gpt-5.5", followCodex: false },
     ];
-    fixture.authConfigIdDraft = "openai";
-    fixture.authProviderDraft = "open_ai_compatible";
+    fixture.authConfigIdDraft = "api";
+    fixture.authProviderDraft = kind;
     const html = renderToStaticMarkup(createElement(SettingsPage, fixture));
     expect(html).toContain("OPENAI_API_KEY");
     expect(html).toContain("删除");
     expect(html).not.toContain("非官方实现");
     expect(html).not.toContain("Codex CLI");
     expect(html).not.toContain(">登录<");
+    expect(html).toContain('type="password"');
+    if (kind === "codex_api_key") {
+      expect(html).toContain("Codex API (Responses)");
+      expect(html).toContain("https://api.openai.com/v1");
+    }
   });
 
   it("preserves the Codex settings panel when Codex is selected", () => {

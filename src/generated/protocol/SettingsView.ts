@@ -2,7 +2,7 @@
 import type { EffectiveSettingsView } from "./EffectiveSettingsView";
 import type { SettingsScopeView } from "./SettingsScopeView";
 
-export type SettingsView = { precedenceNote: string, 
+export type SettingsView = { precedenceNote: string,
 /**
  * Problems found while merging scopes, shown next to the settings editor.
  */

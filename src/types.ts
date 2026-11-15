@@ -28,6 +28,8 @@ export function providerLabel(kind: ProviderKind) {
       return "Anthropic Messages";
     case "gemini_api":
       return "Gemini API";
+    case "codex_api_key":
+      return "Codex API (Responses)";
     case "codex_login":
       return "Codex Login";
     case "antigravity_login":

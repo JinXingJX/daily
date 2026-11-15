@@ -102,6 +102,12 @@ function applyTurnPatch(turn: AgentTurnView, patch: TurnPatch) {
   if (patch.eventViewPatches?.length) {
     update().eventViews = applyEventViewPatches(next.eventViews, patch.eventViewPatches);
   }
+  if (patch.usage !== undefined) {
+    update().usage = patch.usage;
+  }
+  if (patch.errorCode !== undefined) {
+    update().errorCode = patch.errorCode;
+  }
 
   return next;
 }

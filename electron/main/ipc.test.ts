@@ -31,6 +31,7 @@ describe("desktop IPC command routing", () => {
       workspaceInfo: vi.fn(() => ({ path: workspace.path, name: "workspace" })),
       invokeCommand: vi.fn().mockResolvedValue(result),
       chooseWorkspace: vi.fn(), retryBackend: vi.fn(), closeWorkspace: vi.fn(), setDirty: vi.fn(),
+      pluginModuleUrl: vi.fn(async () => "daily-plugin://test/plugin.js"),
     };
     registerDesktopIpc(host);
     const event = {} as IpcMainInvokeEvent;

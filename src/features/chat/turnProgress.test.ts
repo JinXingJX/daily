@@ -12,7 +12,7 @@ function view(id: string, kind: AgentEventView["kind"], status: AgentEventView["
 function turn(status: AgentTurnView["status"], eventViews: AgentEventView[]): AgentTurnView {
   return {
     id: 1, prompt: "", response: "", strategy: "", status, partialResponse: "", steps: [], eventViews,
-    agentAppId: null, agentName: null, pendingAsyncTool: null,
+    agentAppId: null, agentName: null, pendingAsyncTool: null, usage: null, errorCode: null,
   };
 }
 

@@ -1,4 +1,5 @@
 // Regenerates renderer/Electron protocol types and the plugin SDK method list from the Rust sidecar.
+// Desktop exports include shared SDK/provider types explicitly; dependency tests do not run here.
 // ts-rs writes one file per type into src/generated/protocol; this script adds a barrel.
 import { execFileSync } from "node:child_process";
 import { readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
@@ -11,7 +12,7 @@ const pluginMethodsPath = join(import.meta.dirname, "..", "packages", "plugin-sd
 function protocolSnapshot() {
   const files = readdirSync(outDir).filter((name) => name.endsWith(".ts")).sort();
   return JSON.stringify([
-    ...files.map((name) => [name, readFileSync(join(outDir, name), "utf8")]),
+    ...files.map((name) => [name, readFileSync(join(outDir, name), "utf8").replace(/[ \t]+$/gm, "")]),
     ["commands.generated.ts", readFileSync(commandsPath, "utf8")],
     ["methods.generated.ts", readFileSync(pluginMethodsPath, "utf8")],
   ]);
@@ -21,7 +22,7 @@ function protocolSnapshot() {
 // are valid while stale bindings still fail the check.
 const previous = process.argv.includes("--check") ? protocolSnapshot() : null;
 rmSync(outDir, { recursive: true, force: true });
-execFileSync("cargo", ["test", "-q", "-p", "daily-core", "--features", "ts", "export_bindings"], {
+execFileSync("cargo", ["test", "-q", "-p", "daily-desktop-runtime", "--features", "ts", "export_bindings"], {
   stdio: "inherit",
 });
 
@@ -29,6 +30,11 @@ const names = readdirSync(outDir)
   .filter((file) => file.endsWith(".ts") && file !== "index.ts")
   .map((file) => file.slice(0, -3))
   .sort();
+// ts-rs emits spaces before documentation newlines. Keep generated diffs clean.
+for (const name of names) {
+  const path = join(outDir, `${name}.ts`);
+  writeFileSync(path, readFileSync(path, "utf8").replace(/[ \t]+$/gm, ""));
+}
 const barrel = names.map((name) => `export type { ${name} } from "./${name}";`).join("\n");
 writeFileSync(
   join(outDir, "index.ts"),

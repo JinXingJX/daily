@@ -20,9 +20,7 @@ Daily runs AI agents and plugins on your machine with access to a workspace fold
 - **Workspace contents.** Opening a folder you did not create (for example a cloned repository) must not leak your credentials or run code:
   - provider configurations in a workspace's project `settings.json` are ignored, so a repository cannot change where your keys go;
   - local development plugins require an absolute manifest path and a `localhost` dev server URL, so `.daily/plugins.json` from a repository cannot load code it ships or hosts remotely.
-- **Plugin frames versus the app.** Plugin views run in sandboxed iframes with a strict CSP. They cannot reach Node.js, Electron IPC, or the app DOM, and every host call is validated in Rust: paths cannot escape the workspace or reach `.daily`, payloads and collections are size-limited, and writes are atomic.
-- **Plugin network access.** `network.fetch` only reaches public HTTP(S) addresses, re-checks DNS on every redirect (no private, loopback, or link-local targets), ignores proxies, strips credentials on cross-origin redirects, and caps responses at 2 MiB.
-- **The renderer.** Context isolation and sandboxing are on, Node.js integration is off, webviews are disabled, IPC is accepted only from the main frame of a registered window, and only allowlisted commands reach the sidecar.
+- **Plugins and the app.** Plugins are trusted ES modules in the app renderer. They can access the app DOM and share its event loop; Shadow DOM provides style isolation only. Host RPC still validates paths, payloads and enablement, uses atomic writes and keeps provider credentials in Rust. Those checks protect host operations; they are not a sandbox between plugins and the app.
 
 **Out of scope:**
 
@@ -33,5 +31,5 @@ Daily runs AI agents and plugins on your machine with access to a workspace fold
 ## Hardening tips
 
 - Add `.daily/` to the workspace's `.gitignore`; it contains session transcripts and local settings.
-- Prefer `apiKeyEnv` over storing keys in files you might share.
+- Provider keys you enter in the app are stored in plain text in `~/.daily/settings.json` (or a workspace's `settings.local.json`). Daily keeps those files readable by your account only, but anything running as you can read them. Prefer `apiKeyEnv`, which keeps the key out of the file.
 - Keep Daily updated; builds are currently unsigned, so verify you downloaded them from this repository's releases.

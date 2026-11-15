@@ -8,6 +8,12 @@ release
 
 # Daily workspace state (sessions, local settings) created when this repo is opened as a workspace
 .daily
+# Legacy workspace state and local agent work
+.daliy/
+.superpowers/
+.worktrees/
+/writing/
+/docs/superpowers/
 
 # Local files
 *.local

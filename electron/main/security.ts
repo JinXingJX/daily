@@ -11,6 +11,8 @@ export function lockDownSessionPermissions(): void {
 export function secureWebPreferences(preload: string): WebPreferences {
   return {
     preload,
+    // Plugins run their background work in this window; it must keep going while hidden.
+    backgroundThrottling: false,
     contextIsolation: true,
     sandbox: true,
     nodeIntegration: false,

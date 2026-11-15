@@ -30,7 +30,7 @@ const turn: AgentTurnView = {
   eventViews: [view()],
   agentAppId: 1,
   agentName: "Agent",
-  pendingAsyncTool: null,
+  pendingAsyncTool: null, usage: null, errorCode: null,
 };
 
 const session: ChatSessionView = {

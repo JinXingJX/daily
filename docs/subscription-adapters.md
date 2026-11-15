@@ -26,7 +26,7 @@ The Antigravity adapter reuses the sign-in of the official Antigravity 2.x deskt
 - **Live test** (requires a signed-in client):
 
   ```bash
-  cargo test -p daily-core live_antigravity_catalog_and_models -- --ignored --nocapture
+  cargo test -p daily-agent-providers --features login live_antigravity_catalog_and_models -- --ignored --nocapture
   ```
 
 ## Removing an adapter
@@ -35,5 +35,5 @@ Delete its entry from `auth.configs` in `~/.daily/settings.json` (or use **Delet
 
 ## Code
 
-- `crates/daily-core/src/model/codex/` — Codex auth, catalog, and streaming
-- `crates/daily-core/src/model/antigravity/` — Keychain auth, catalog, and streaming
+- `crates/daily-agent-providers/src/codex/` — Responses protocol and optional Codex auth/catalog (`login` feature)
+- `crates/daily-agent-providers/src/antigravity/` — Keychain auth, catalog, and streaming (`login` feature)

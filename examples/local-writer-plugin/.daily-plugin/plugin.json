@@ -9,11 +9,10 @@
       {
         "id": "writer-lab.canvas",
         "title": "Writer Lab",
-        "location": "main",
-        "runtime": "iframe",
-        "entry": "view.js",
         "icon": "notebook-pen"
       }
     ]
-  }
+  },
+  "entry": "view.js",
+  "activation": "onView"
 }

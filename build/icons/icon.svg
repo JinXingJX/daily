@@ -1,0 +1,89 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="tile" x1="221" y1="24" x2="771" y2="1000" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#272a34" />
+      <stop offset="0.46" stop-color="#1d202b" />
+      <stop offset="1" stop-color="#151823" />
+    </linearGradient>
+    <radialGradient id="tileLight" cx="368" cy="241" r="810" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#343640" stop-opacity="0.24" />
+      <stop offset="1" stop-color="#181b25" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="groundShadow" cx="0.5" cy="0.5" r="0.5">
+      <stop stop-color="#050711" stop-opacity="0.64" />
+      <stop offset="0.58" stop-color="#070914" stop-opacity="0.3" />
+      <stop offset="1" stop-color="#070914" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="bowlPaper" x1="292" y1="445" x2="615" y2="566" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff8ec" />
+      <stop offset="0.54" stop-color="#f6ebda" />
+      <stop offset="0.84" stop-color="#e5d3bb" />
+      <stop offset="1" stop-color="#c2ab8d" />
+    </linearGradient>
+    <linearGradient id="lowerBlue" x1="282" y1="557" x2="492" y2="821" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#002782" />
+      <stop offset="0.33" stop-color="#0043dc" />
+      <stop offset="0.71" stop-color="#1768ff" />
+      <stop offset="1" stop-color="#0048ed" />
+    </linearGradient>
+    <linearGradient id="paperFront" x1="380" y1="476" x2="720" y2="839" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff9ef" />
+      <stop offset="0.43" stop-color="#f7ecdc" />
+      <stop offset="0.74" stop-color="#e9dac5" />
+      <stop offset="1" stop-color="#c9b9a3" />
+    </linearGradient>
+    <linearGradient id="stemLight" x1="593" y1="434" x2="779" y2="453" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fffaf1" />
+      <stop offset="0.53" stop-color="#f9eedf" />
+      <stop offset="1" stop-color="#f0e1cb" />
+    </linearGradient>
+    <linearGradient id="lipPaper" x1="608" y1="210" x2="645" y2="326" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fffcf5" />
+      <stop offset="1" stop-color="#eddfc9" />
+    </linearGradient>
+    <linearGradient id="topBlue" x1="636" y1="246" x2="828" y2="149" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#002d9f" />
+      <stop offset="0.48" stop-color="#0049ee" />
+      <stop offset="1" stop-color="#206cff" />
+    </linearGradient>
+    <linearGradient id="foldShade" x1="659" y1="224" x2="704" y2="358" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#c4ab88" stop-opacity="0.5" />
+      <stop offset="1" stop-color="#e9d9c0" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  <g id="app-tile">
+    <rect x="24" y="24" width="976" height="976" rx="208" fill="url(#tile)" />
+    <rect x="24" y="24" width="976" height="976" rx="208" fill="url(#tileLight)" />
+    <rect x="24.5" y="24.5" width="975" height="975" rx="207.5" fill="none" stroke="#ffffff" stroke-opacity="0.025" />
+  </g>
+
+  <ellipse cx="505" cy="873" rx="355" ry="117" fill="url(#groundShadow)" />
+
+  <g id="folded-d">
+    <g id="upper-bowl">
+      <path d="M599 403 C557 383 517 376 477 378 C359 383 258 454 215 556 C194 607 193 668 212 721 C205 676 243 604 318 555 C364 525 414 508 459 511 C517 511 568 540 597 588 Z" fill="url(#bowlPaper)" />
+    </g>
+
+    <g id="blue-inner-bowl">
+      <path d="M318 555 C299 582 292 614 301 650 C313 703 368 746 433 752 C489 758 548 740 580 711 C566 753 530 788 483 807 C421 833 350 827 295 800 C251 779 218 749 212 718 C203 683 230 613 318 555 Z" fill="url(#lowerBlue)" />
+    </g>
+
+    <g id="top-fold">
+      <path d="M598 345 L599 278 C598 228 622 187 670 166 C644 182 635 214 638 265 C620 285 605 313 598 345 Z" fill="url(#lipPaper)" />
+      <path d="M638 265 C635 226 640 184 670 166 C703 152 750 142 786 142 C815 141 835 148 842 161 C855 184 816 208 779 216 C725 228 675 234 638 265 Z" fill="url(#topBlue)" />
+    </g>
+
+    <g id="front-ribbon">
+      <path d="M598 345 C608 291 641 255 690 237 C735 221 800 218 831 194 C794 220 777 247 777 290 L776 642 C776 726 750 794 699 844 C647 894 574 919 489 919 C410 920 343 896 290 850 C252 817 224 772 212 721 C227 759 268 791 319 808 C373 826 431 824 483 805 C536 786 572 752 587 702 C594 679 597 654 597 624 Z" fill="url(#paperFront)" />
+      <path d="M598 345 C608 291 641 255 690 237 C735 221 800 218 831 194 C794 220 777 247 777 290 L776 613 C776 672 770 711 752 751 C706 743 650 721 587 702 C594 679 597 654 597 624 Z" fill="url(#stemLight)" />
+      <path d="M598 345 C608 291 641 255 690 237 C735 221 800 218 831 194 C794 220 777 247 777 290 L777 373 C728 351 661 336 598 345 Z" fill="url(#foldShade)" />
+    </g>
+
+    <g id="paper-edges" fill="none" stroke-linecap="round">
+      <path d="M638 265 C676 234 725 228 779 216 C802 211 820 203 831 194" stroke="#fffaf1" stroke-width="1.7" stroke-opacity="0.82" />
+      <path d="M212 718 C222 756 265 790 319 808 C373 826 431 824 483 805 C529 789 564 759 580 724" stroke="#fff8ed" stroke-width="1.6" stroke-opacity="0.76" />
+      <path d="M599 403 L597 583" stroke="#fffaf2" stroke-width="1" stroke-opacity="0.28" />
+    </g>
+  </g>
+</svg>

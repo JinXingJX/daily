@@ -9,7 +9,7 @@
     "url": "git+https://github.com/JinXingJX/daily.git",
     "directory": "packages/plugin-sdk"
   },
-  "description": "Typed client for the Daily plugin host bridge (window.dailyPlugin).",
+  "description": "definePlugin, the typed host API, and task helpers for Daily plugins.",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

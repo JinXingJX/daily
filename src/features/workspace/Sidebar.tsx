@@ -42,7 +42,6 @@ type AppRailProps = {
 };
 
 export function AppRail(props: AppRailProps) {
-  const mainPluginViews = props.pluginViews.filter(({ view }) => view.location === "main");
   const chatActive = routeIsCore(props.activeRoute, "chat");
   const settingsActive = routeIsCore(props.activeRoute, "settings");
 
@@ -56,7 +55,7 @@ export function AppRail(props: AppRailProps) {
         <MessageSquare className="size-[18px]" />
         {props.runtimeIsRunning ? <span className="app-rail-badge" aria-hidden="true" /> : null}
       </RailButton>
-      {mainPluginViews.map(({ plugin, view }) => {
+      {props.pluginViews.map(({ plugin, view }) => {
         const tone = pluginViewTone(view);
         const Icon = pluginViewIcon(view);
         const active =
