@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@daily/plugin-sdk": ["../../packages/plugin-sdk/src/index.ts"],
+      "@/i18n": ["src/i18n/index.ts"]
+    },
+    "types": ["vite/client"],
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"]
+  },
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts"],
+  "references": []
+}
