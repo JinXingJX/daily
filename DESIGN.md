@@ -1,46 +1,226 @@
-# Daily Desktop Design System
+# Daily 设计规范
 
-## Physical scene
+这份文件是 Daily 界面的唯一标准。任何人或任何 coding agent 只读这一份，就应当能做出风格一致的桌面界面或网页。规范里的每个数值都已在 `src/styles/tokens.css` 落地；两者冲突时以本文件为准，并同步修改 token。
 
-Daily is used by a developer on a 14 to 27-inch display for long agent sessions in mixed ambient light. The interface defaults to the operating-system theme, keeps contrast comfortable for sustained reading, and prioritizes visible runtime state over decoration.
+原型画布（Claude Design）：<https://claude.ai/artifact/FbmsbynTp1VVEMKbLiXye9>（01–05 静态稿，06 可点击交互原型）。
 
-## Visual strategy
+## 1. 气质与三条总则
 
-- Register: product.
-- Color strategy: restrained graphite neutrals with one cobalt accent below 10 percent of the visible surface.
-- Surfaces use warm graphite OKLCH neutrals with a subtly cool content canvas. Pure black, pure white, gradients, glass effects, and decorative color are excluded.
-- Green, amber, and red communicate success, waiting, and failure only. Every semantic color is paired with text or an icon.
+Daily 是长时间使用的本地智能体工作台。界面像一张暖色的纸：安静、留白充分，内容和运行状态是主角。
 
-## Typography
+1. **一张纸，一种墨，一处陶土色。** 暖灰中性色铺满界面，文字是墨色，陶土色（clay）在一屏里只出现在一两处：新任务、发送、选中的模式。
+2. **状态出现在用户正在看的地方。** 不设常驻状态栏。运行状态在标题栏胶囊、任务行和步骤卡里；运行时健康度是工作区头像上的一个点。
+3. **衬线只给"话"。** 问候语、页面标题、智能体的正文用衬线；所有控件、列表、标签用无衬线。
 
-- UI: `Geist Sans`, `-apple-system`, `BlinkMacSystemFont`, `Segoe UI`, `system-ui`, sans-serif.
-- Technical metadata: `Geist Mono`, `SFMono-Regular`, `Roboto Mono`, ui-monospace, monospace.
-- Product labels range from 11 to 16px. Body prose stays within 65 to 75 characters where possible.
+禁止：纯白整页背景、纯黑、冷灰、渐变、玻璃拟态、彩色描边卡片、左侧色条卡片、emoji 当图标、加粗的衬线标题、一屏出现第二种强调色。
 
-## Desktop shell
+## 2. 色彩
 
-- Unified titlebar: 44px, draggable except controls marked `.no-drag`. Its left segment spans the 56px app rail plus the task panel (or settings navigation) so the columns line up; it shows the open task's run state (running step and elapsed time, waiting, or failed step).
-- Status bar: 26px along the bottom edge with runtime health, the default model, and the enabled plugin count.
-- macOS traffic-light safe area: 78px from the left edge.
-- Task panel: 264px default, resizable from 220 to 400px, hidden with the titlebar toggle.
-- Conversation views may open a 340px inspector (run, context, hooks tabs) on the right. Below 1180px it overlays the canvas instead of compressing it.
-- Settings replace the task panel with their own 288px navigation.
-- Window: 1440×960 default, 1180×760 minimum.
-- Main canvas owns all remaining space. Retained plugin Shadow DOM views begin below the unified titlebar and fill the canvas.
-- The conversation composer is a bounded, floating control near the bottom of the canvas rather than a full-width footer.
-- Z-index: canvas 0, inspector overlay 25, status banner 20, titlebar 30, command overlay 50.
-- Keyboard: ⌘K command palette, ⌘N new task, ⌘I inspector, ⌘, settings, ⌘⏎ send, ⌘S save agent.
+所有颜色通过 CSS 变量使用，禁止在组件里写十六进制值。
 
-## Component states
+### 2.1 表面与线
 
-- Controls implement default, hover, focus-visible, active, disabled, loading, and error states.
-- Runtime states are `starting`, `ready`, `restarting`, `failed`, and `stopped`.
-- Loading uses structural skeletons. Runtime failure uses an inline banner with retry instead of a blocking modal.
-- Focus rings use a two-step surface and cobalt outline and must remain visible in both themes.
+| Token | 浅色 | 深色 | 用途 |
+| --- | --- | --- | --- |
+| `--app-main-bg` | `#FAF9F5` | `#262624` | 画布：主区域、标题栏、检查器 |
+| `--app-sidebar-bg` | `#F5F4ED` | `#1F1E1D` | 侧栏 |
+| `--surface-strong` | `#FFFFFF` | `#30302E` | 浮起的卡片：输入卡片、设置分组、弹层、输入框 |
+| `--surface` | `#F5F4ED` | `#2B2B29` | 画布上的浅底块：代码块、恢复条、进行中的步骤行 |
+| `--surface-muted` | `#F0EEE6` | `#353533` | 分段控件底、运行胶囊、小标签 |
+| `--surface-inset` | `#E8E6DC` | `#1A1918` | 骨架屏、禁用控件底 |
+| `--message-user-bg` | `#F0EEE6` | `#1A1918` | 用户消息气泡 |
+| `--fill-hover` | `rgba(20,20,19,.05)` | `rgba(250,249,245,.06)` | 任何透明控件的悬停底 |
+| `--fill-active` | `rgba(20,20,19,.08)` | `rgba(250,249,245,.10)` | 当前项、按下的图标按钮、选中的标签页 |
+| `--segment-track` / `--segment-thumb` | `#F0EEE6` / `#FFFFFF` | `#1A1918` / `#4D4C48` | 分段控件的底槽与选中块 |
+| `--line` | `#DEDCD1` | `#3D3D3A` | 结构分隔线、卡片描边 |
+| `--line-soft` | `#E8E6DC` | `#353533` | 卡片内部的行分隔 |
+| `--line-strong` | `#D1CFC5` | `#4D4C48` | 输入框、次要按钮描边 |
+| `--line-active` | `#B0AEA5` | `#5E5D59` | 聚焦的输入卡片、拖拽手柄 |
 
-## Motion and accessibility
+层级只有三层：侧栏（最深）→ 画布 → 白卡片。相邻两层用 1px `--line` 分开，不用阴影分层。
 
-- State transitions use 150 to 200ms ease-out-quart timing.
-- Layout properties are not animated. Reduced-motion disables pulses, rotations, and reveals.
-- Text and interactive controls target WCAG AA contrast.
-- Icon-only controls require accessible labels and a minimum 32px target in dense desktop contexts.
+### 2.2 文字
+
+| Token | 浅色 | 深色 | 用途 |
+| --- | --- | --- | --- |
+| `--text-strong` | `#141413` | `#FAF9F5` | 标题、当前项、输入内容、智能体正文 |
+| `--text` | `#3D3D3A` | `#DEDCD1` | 界面正文、列表行 |
+| `--text-soft` | `#5E5D59` | `#B0AEA5` | 次要说明、图标 |
+| `--text-muted` | `#6B6A64` | `#9C9A92` | 分组标签、时间、提示（最浅的可读文字，对比度 ≥ 4.5:1） |
+| `--text-disabled` | `#9C9A92` | `#73726C` | 仅禁用态 |
+
+### 2.3 墨与陶土
+
+| Token | 浅色 | 深色 | 用途 |
+| --- | --- | --- | --- |
+| `--primary` / `--primary-contrast` | `#141413` / `#FAF9F5` | `#FAF9F5` / `#141413` | **带文字的主要按钮一律用墨色** |
+| `--accent` | `#D97757` | `#D97757` | 只承载图标的强调面：发送键、新任务圆点、运行中的转圈 |
+| `--accent-hover` / `--accent-strong` | `#C6613F` | `#E08B6D` | 强调面悬停；焦点环颜色 |
+| `--accent-text` | `#B5532F` | `#E8997D` | 强调色文字、链接 |
+| `--accent-soft` / `--accent-line` | `#F6E9E2` / `#EDC5B6` | `rgba(217,119,87,.16)` / `.42` | 选中的模式片 |
+
+规则：陶土色填充面上只放图标，不放文字（白字对比度不足 4.5:1）。需要文字的按钮用墨色。
+
+### 2.4 状态色
+
+只表达运行状态，并且总是配图标或文字，绝不单靠颜色。
+
+| 状态 | 文字 `--x` | 实心 `--x-fill` | 浅底 `--x-soft` | 图标 |
+| --- | --- | --- | --- | --- |
+| 运行中 | `--text-strong` | 转圈用 `--accent` | `--surface-muted` | `LoaderCircle` 旋转 |
+| 完成 success | `#3F6B2F` / `#9BC184` | `#558A42` / `#6A9A55` | `#E9F0E0` | `Check` |
+| 等待 warning | `#7D5A00` / `#E0B95B` | `#C08A1E` / `#C99A2E` | `#F7EDD3` | `CirclePause` |
+| 失败 danger | `#A8322A` / `#F0958B` | `#C0453B` | `#F8E6E2` | `CircleAlert` |
+
+"运行中"保持中性，因为陶土、琥珀、红色相相近，三者同时上色无法区分。
+
+## 3. 字体
+
+```css
+--font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", "Noto Sans SC", system-ui, sans-serif;
+--font-serif: "Iowan Old Style", Charter, Cambria, Georgia, "Songti SC", "Noto Serif SC", "Source Han Serif SC", serif;
+--font-mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, Consolas, monospace;
+--font-reading: var(--font-serif); /* 智能体正文；想要更密的技术风格时只改这一处为 --font-sans */
+```
+
+只用系统字体，不联网加载。网页版可在 `--font-serif` 最前面加 `"Source Serif 4"`。
+
+| 角色 | 字体 | 字号/行高 | 字重 | 用在 |
+| --- | --- | --- | --- | --- |
+| display | serif | 36/44 | 400 | 新任务问候语 |
+| title | serif | 30/38 | 400 | 页面标题（设置） |
+| brand | serif | 18/24 | 400 | 侧栏顶部 "Daily" |
+| reading | reading | 16/27 | 400 | 智能体正文；其中标题 24/20/17，字重 600 |
+| heading | sans | 16/24 | 600 | 分区标题 |
+| body | sans | 14/20 | 400；当前项与按钮 500 | 界面默认 |
+| input | sans | 15/24（起始页 16/24） | 400 | 输入卡片、用户气泡 |
+| small | sans | 13/20 | 400 | 片状按钮、步骤行、说明 |
+| label | sans | 12/16 | 500 | 分组标签；说明文字用 400 |
+| mono | mono | 13/21（步骤行 12，时间 11） | 400 | 代码、路径、工具名、耗时 |
+
+字距恒为 0。衬线永不加粗到 600 以上，永不用于按钮和标签。数字用 `tabular-nums`。
+
+## 4. 间距、圆角、阴影
+
+间距取自 `2 4 6 8 10 12 14 16 20 22 28 32 40`（px）。同组控件间距 4–8，卡片内边距 12–16，区块间距 22–28。
+
+| Token | 值 | 用在 |
+| --- | --- | --- |
+| `--radius-control` | 8px | 按钮、输入框、列表行、标签页 |
+| `--radius-chip` | 10px | 32px 片状按钮、发送键、图标栏按钮 |
+| `--radius-panel` | 12px | 卡片、代码块、步骤卡、设置分组 |
+| `--radius-popover` | 14px | 菜单、下拉（命令面板 16px） |
+| `--radius-bubble` | 18px | 用户气泡 |
+| `--radius-composer` | 20px | 输入卡片 |
+| `--radius-full` | 9999px | 胶囊、头像、状态点 |
+
+阴影只有四种，其余一律用描边：`--shadow-card`（分段控件选中项）、`--shadow-composer`（输入卡片：`0 4px 20px rgba(20,20,19,.04), 0 1px 2px rgba(20,20,19,.03)`）、`--shadow-popover`、`--shadow-modal`。
+
+图标用 Lucide，描边 1.75（`.lucide { stroke-width: 1.75 }`），行内 16px，小号 14px，图标栏 17px。品牌标记是"地平线上的太阳"（`src/components/app/DailyMark.tsx`），陶土色。
+
+## 5. 布局
+
+窗口默认 1440×960，最小 1180×760。没有独立的标题栏底色，没有底部状态栏。
+
+```
+┌──────────── 264 ───────────┬───────────────────────────────────────┬── 340 ──┐
+│ ●●●  Daily            [⇤]  │ 任务标题        (运行胶囊) 后台任务 [⇥] │         │ 44
+├────────────────────────────┤                                       │ 检查器  │
+│ (+) 新任务            ⌘N   │        对话列 max 720，居中             │ 可选    │
+│ 🔍 搜索任务与命令      ⌘K   │                                       │         │
+│ 插件  …                    │                                       │         │
+│ 任务  …                    │        输入卡片 max 720，贴底 14        │         │
+│ (D) 工作区             ⌄   │                                       │         │
+└────────────────────────────┴───────────────────────────────────────┴─────────┘
+```
+
+- **标题栏** 44px，可拖拽；左段宽度等于侧栏并延续侧栏底色，右段延续画布。macOS 红绿灯留 78px。
+- **侧栏** 默认 264，可拖到 220–400；是全局状态，在所有页面保持。收起后变成 52px 无边框图标栏，切换按钮移到红绿灯右侧（左段宽 118）。
+- **对话列** 最大 720px 居中，左右留 32；起始页内容列 672px，垂直居中略偏上。
+- **检查器** 340px，画布底色加左描边；窗口窄于 1180 时浮在对话之上。
+- **设置** 保留侧栏；主区域是 240px 导航（顶部衬线标题）加内容列（最大 736px）。
+- 层级：画布 0，状态横幅 20，检查器浮层 25，标题栏 30，弹层与命令面板 50。
+
+## 6. 组件
+
+所有交互控件都实现：默认、悬停、键盘焦点、按下、禁用；会等待的再加加载态。
+
+- **按钮**：高 36（小号 32），圆角 8，字重 500。主要＝墨底；次要＝白卡底加 `--line-strong` 描边；幽灵＝透明，悬停 `--fill-hover`；危险＝`--danger-fill` 白字。一个区域只放一个主要按钮。
+- **图标按钮**：32×32，圆角 8，图标 `--text-soft`；悬停 `--fill-hover`，按下态（`aria-pressed`）`--fill-active`。必须有 `aria-label` 和 `title`。
+- **片状按钮** `.chip-button`：高 32，圆角 10，1px `--line`，文字 13px `--text-soft`；选中＝`--accent-soft` 底、`--accent-line` 边、`--accent-text` 字、500。起始提示用 34px 高的大号。
+- **发送键** `.composer-send`：32×32，圆角 10，陶土底白色上箭头；禁用＝`--surface-inset` 底。运行中换成墨色"■ 停止"按钮。
+- **列表行** `.sidebar-row`：最小高 34，圆角 8，左右内边距 8–10；悬停 `--fill-hover`；当前项 `--fill-active` + `--text-strong` + 500，不加阴影、不加色条。空闲任务不带图标，只有运行中、等待、失败在行尾显示状态图标，并多一行 12px 说明。
+- **输入卡片** `.composer-card`：白卡、圆角 20、1px `--line`、`--shadow-composer`；聚焦时描边变 `--line-active`，没有彩色光晕。底排从左到右：添加（+）、模式片、弹性空白、智能体选择（无描边）、发送。卡片下方一行 12px：左边模型名，右边快捷键提示。
+- **消息**：用户＝右对齐气泡，最大宽 85%，圆角 18，15/24；智能体＝无气泡，直接写在画布上，上方一行"标记 + 名称 + 右侧状态"。
+- **步骤卡** `.step-card`：圆角 12、1px 描边、透明底；每行 `状态图标 · 类别(4.5rem) · 等宽详情 · 耗时`，行间 `--line-soft`；进行中的行底为 `--surface`，失败行底为淡红并展开输出。
+- **设置分组** `.settings-group`：白卡、圆角 12；行内边距 14×16，左标题加说明，右控件。
+- **分段控件** `.segmented`：`--segment-track` 底槽、圆角 10、内边距 2；选中项 `--segment-thumb` 加 `--shadow-card`。
+- **运行胶囊** `.run-pill`：高 26，全圆角，12px/500。
+- **弹层**：白卡、圆角 14、`--shadow-popover`，行高 34；命令面板宽 640、圆角 16、距顶 112。
+- **键帽** `.kbd`：等宽 11px，1px 描边，圆角 6。
+
+## 7. 交互
+
+### 7.1 输入与发送（状态机）
+
+```
+空 ──输入──▶ 可发送 ──⌘⏎ / 点击发送──▶ 运行中 ──全部步骤完成──▶ 已完成
+                                        │
+                                        └─点击停止 / 出错──▶ 已停止·失败 ──从断点继续──▶ 运行中
+                                                                      └─重新开始──▶ 运行中（步骤清零）
+```
+
+- 空输入时发送键禁用。起始页的三个提示片把文字填进输入框并聚焦，**不直接发送**。
+- 发送后立刻：清空输入、追加用户气泡、标题栏出现运行胶囊、侧栏该任务行出现转圈、发送键变"停止"。不等后端返回再反馈。
+- 运行中输入框仍可写，占位文字改为"可以先写下补充要求"，但不能发送。
+- 步骤逐条出现，当前步骤行高亮并带转圈；完成后步骤卡折叠成一行摘要，点击展开。失败时自动展开并打开失败步骤的输出。
+- 失败或停止后在回复下方出现恢复条：说明文字 + 次要按钮"重新开始" + 主要按钮"从断点继续"。
+- 模式片是可取消的单选：再点一次清除；选中后在输入卡片下方说明会附加什么指令。
+- 输入以 `/` 开头时，卡片顶部出现命令片。拖入图片时整个对话区显示虚线投放层。
+
+### 7.2 滚动
+
+对话区只在读者位于底部（距底 < 80px）时跟随新内容；读者上滚查看旧步骤时绝不打断。发出新消息或出现新回合时回到底部。
+
+### 7.3 导航与面板
+
+- 侧栏切换按钮始终在同一位置附近；展开/收起状态记入本地偏好。
+- 检查器：⌘I 或标题栏右侧按钮开合，按钮用 `aria-pressed` 表示；从右侧滑入。
+- 工作区菜单从底部头像向上弹出；点外部或 Esc 关闭。主题切换在菜单内即时生效。
+- 命令面板：⌘K 开合；焦点留在搜索框，↑↓ 选择，⏎ 执行，Esc 或点遮罩关闭；关闭后焦点回到原处。
+- 侧栏右缘可拖拽调宽；手柄可聚焦，←/→ 每次 16px。
+
+### 7.4 键盘
+
+| 快捷键 | 动作 | 快捷键 | 动作 |
+| --- | --- | --- | --- |
+| ⌘N | 新任务 | ⌘⏎ | 发送 |
+| ⌘K | 命令面板 | ⌘I | 检查器 |
+| ⌘, | 设置 | ⌘S | 保存智能体 |
+| Esc | 关闭最上层弹层 | / | 输入框内调出命令 |
+
+所有控件可 Tab 到达，顺序为：侧栏 → 标题栏 → 内容 → 输入卡片。快捷键写在控件的 `title` 和行尾键帽里。
+
+### 7.5 焦点、动效、反馈
+
+- 焦点环只在键盘聚焦（`:focus-visible`）时出现：`0 0 0 2px 画布色, 0 0 0 4px var(--accent-strong)`；卡片内部的行用内描边 2px。
+- 动效：颜色与底色过渡 150ms；出现类（消息、弹层、胶囊）200ms，位移 6–10px 加淡入；缓动统一 `cubic-bezier(0.25, 1, 0.5, 1)`。不对宽高做动画。转圈 1s 线性。`prefers-reduced-motion` 下全部关闭。
+- 加载用结构化骨架屏（与真实布局同形）；运行时故障用顶部内联横幅加"重试"，不用阻塞弹窗；破坏性操作才用确认。
+- 空状态用一句话说明加一个动作，不放插画。
+
+## 8. 无障碍
+
+正文与控件文字对比度 ≥ 4.5:1，图标与焦点环 ≥ 3:1；状态不单靠颜色；桌面密集场景点击目标 ≥ 32px（触屏网页 ≥ 44px）；纯图标按钮必须有可访问名称；真实使用 `button`、`a`、`input`+`label`；状态变化用 `role="status"`，错误用 `role="alert"`。
+
+## 9. 复现清单（给 coding agent）
+
+1. 原样复制 `src/styles/tokens.css`，浅色写在 `:root`，深色写在 `html[data-theme="dark"]`；`body` 设 `--app-main-bg`、`--text`、`--font-sans`、14/20。
+2. 先搭三层结构：侧栏、画布、白卡片；用 1px `--line` 分层。
+3. 标题与智能体正文用衬线，其余全部无衬线。
+4. 一屏只留一到两处陶土色；带字的主要按钮用墨色。
+5. 悬停一律 `--fill-hover`，当前项一律 `--fill-active`。
+6. 圆角按第 4 节取值：控件 8、片 10、卡片 12、气泡 18、输入卡片 20。
+7. 按第 7 节实现状态机、滚动跟随、键盘与焦点环。
+8. 交付前对照第 1 节的"禁止"清单，并在浅色、深色各检查一遍对比度。
+
+网页版同样适用：把 44px 标题栏换成普通顶栏，去掉红绿灯留白，窄屏时侧栏改为抽屉，其余不变。

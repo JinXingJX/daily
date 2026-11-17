@@ -530,3 +530,7 @@ export function errorMessage(error: unknown, fallback: string): string {
 export { createPluginHost, type PluginHostTransport } from "./host";
 export { PLUGIN_RPC_METHODS, type PluginRpcMethod } from "./methods.generated";
 export { localizeHostText, type HostTextLocale } from "./hostText";
+
+// Shared visual foundation for Shadow DOM plugin views.
+export { pluginDesignStyles } from "./design";
+export { focusPluginPanel } from "./focus";

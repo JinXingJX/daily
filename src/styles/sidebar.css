@@ -1,4 +1,4 @@
-/* ---- Task sidebar ---- */
+/* ---- Sidebar ---- */
 
 .app-sidebar {
   width: 100%;
@@ -6,79 +6,18 @@
   background: var(--app-sidebar-bg);
 }
 
-.sidebar-new-task {
-  display: flex;
-  height: 34px;
-  min-width: 0;
-  flex: 1;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-control);
-  background: var(--surface-strong);
-  padding: 0 10px;
-  color: var(--text-strong);
-  font-weight: 500;
-  box-shadow: var(--shadow-card);
-  transition: border-color var(--duration-fast) var(--ease-out);
-}
-
-.sidebar-new-task:hover {
-  border-color: var(--line-active);
-}
-
-.sidebar-new-task[aria-pressed="true"] {
-  border-color: var(--accent-line);
-  background: var(--accent-soft);
-  color: var(--accent-text);
-}
-
-.sidebar-square-button {
-  display: grid;
-  width: 34px;
-  height: 34px;
-  flex: none;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-control);
-  background: transparent;
-  color: var(--text-soft);
-}
-
-.sidebar-square-button:hover {
-  border-color: var(--line-strong);
-  color: var(--text-strong);
-}
-
-.sidebar-new-task:focus-visible,
-.sidebar-square-button:focus-visible,
-.sidebar-row:focus-visible,
-.sidebar-workspace-button:focus-visible,
-.workspace-menu-row:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-}
-
-.sidebar-section-label {
-  display: flex;
-  justify-content: space-between;
-  padding: 4px 8px 6px;
-  color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 500;
-}
-
+/* One row shape for actions, plugin views and tasks. */
 .sidebar-row {
   display: flex;
   width: 100%;
   min-width: 0;
   min-height: 34px;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   border: 0;
   border-radius: var(--radius-control);
   background: transparent;
-  padding: 6px 8px;
+  padding: 0 8px;
   color: var(--text);
   text-align: left;
   transition:
@@ -87,34 +26,109 @@
 }
 
 .sidebar-row:hover {
-  background: var(--geist-gray-alpha-100);
+  background: var(--fill-hover);
+  color: var(--text-strong);
 }
 
 .sidebar-row-active,
 .sidebar-row-active:hover {
-  background: var(--surface-strong);
+  background: var(--fill-active);
   color: var(--text-strong);
-  box-shadow: var(--shadow-raised);
+  font-weight: 500;
 }
 
-.sidebar-row-nested {
-  position: relative;
-  min-height: 30px;
-  padding-left: 30px;
+.sidebar-row-icon {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  flex: none;
+  place-items: center;
   color: var(--text-soft);
-  font-size: 12px;
 }
 
-.sidebar-row-nested::before {
+.sidebar-row-kbd {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.sidebar-task {
+  gap: 8px;
+  padding: 6px 10px;
+}
+
+.sidebar-task-nested {
+  position: relative;
+  padding-left: 28px;
+  color: var(--text-soft);
+}
+
+.sidebar-task-nested::before {
   content: "";
   position: absolute;
   top: -2px;
   left: 14px;
-  width: 10px;
-  height: 15px;
+  width: 8px;
+  height: 19px;
   border-bottom: 1px solid var(--line-strong);
   border-left: 1px solid var(--line-strong);
-  border-bottom-left-radius: 4px;
+  border-bottom-left-radius: 5px;
+}
+
+.sidebar-section-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 24px;
+  margin: 0;
+  padding: 4px 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.sidebar-label-action {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  margin: -3px -4px -3px 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.sidebar-label-action:hover {
+  background: var(--fill-hover);
+  color: var(--text-strong);
+}
+
+.sidebar-empty {
+  width: 100%;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-control);
+  background: transparent;
+  padding: 12px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 18px;
+  text-align: left;
+}
+
+.sidebar-empty:hover {
+  border-color: var(--line-active);
+  color: var(--text-strong);
+}
+
+.sidebar-row:focus-visible,
+.sidebar-label-action:focus-visible,
+.sidebar-empty:focus-visible,
+.sidebar-workspace-button:focus-visible,
+.workspace-menu-row:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .sidebar-workspace-button {
@@ -123,30 +137,42 @@
   align-items: center;
   gap: 10px;
   border: 0;
-  border-radius: var(--radius-panel);
+  border-radius: var(--radius-chip);
   background: transparent;
   padding: 8px;
   color: var(--text-strong);
   text-align: left;
+  transition: background-color var(--duration-fast) var(--ease-out);
 }
 
-.sidebar-workspace-button:hover,
+.sidebar-workspace-button:hover {
+  background: var(--fill-hover);
+}
+
 .sidebar-workspace-button[aria-expanded="true"] {
-  background: var(--geist-gray-alpha-100);
+  background: var(--fill-active);
 }
 
 .workspace-mark {
+  position: relative;
   display: grid;
   width: 30px;
   height: 30px;
   flex: none;
   place-items: center;
-  border-radius: var(--radius-control);
+  border-radius: var(--radius-full);
   background: var(--primary);
   color: var(--primary-contrast);
-  font-family: var(--font-geist-mono);
   font-size: 13px;
   font-weight: 500;
+}
+
+/* Runtime health rides on the workspace mark; its label is the accessible name. */
+.workspace-mark .status-dot {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  box-shadow: 0 0 0 2px var(--app-sidebar-bg);
 }
 
 .workspace-menu {
@@ -158,16 +184,17 @@
   overflow: hidden;
   border-radius: var(--radius-popover);
   background: var(--surface-strong);
+  padding-bottom: 0.25rem;
   box-shadow: var(--shadow-popover);
 }
 
 .workspace-menu-row {
   display: flex;
   width: calc(100% - 0.5rem);
-  height: 2.25rem;
+  height: 2.125rem;
   align-items: center;
   gap: 0.65rem;
-  margin: 0.25rem;
+  margin: 0.25rem 0.25rem 0;
   border: 0;
   border-radius: var(--radius-control);
   background: transparent;
@@ -176,5 +203,5 @@
 }
 
 .workspace-menu-row:hover {
-  background: var(--geist-gray-alpha-100);
+  background: var(--fill-hover);
 }

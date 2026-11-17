@@ -1,14 +1,7 @@
 import type { AgentAppConfig, AgentTurnView, ComposerImage } from "@/types";
-import {
-  Bot,
-  FolderOpen,
-  GitBranch,
-  ImagePlus,
-  KeyRound
-} from "lucide-react";
+import { ImagePlus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ActivityPanel } from "./ActivityPanel";
-import { hookAgentNames } from "./chatHelpers";
 import { ChatReadiness, ComposerMode, RenderMessage, SettingsTarget } from "./chatTypes";
 import { Composer } from "./Composer";
 import { MessageFeed } from "./MessageFeed";
@@ -23,6 +16,8 @@ type ChatSurfaceProps = {
   modelLabel: string | null;
   runtimeIsRunning: boolean;
   modelReady: boolean;
+  /** The model's sign-in provider is known to be signed out. */
+  modelSignedOut: boolean;
   readiness: ChatReadiness;
   agents: AgentAppConfig[];
   messages: RenderMessage[];
@@ -76,6 +71,7 @@ export function ChatSurface(props: ChatSurfaceProps) {
       activeSessionTitle={props.activeSessionTitle}
       activeSessionAgentAppId={props.activeSessionAgentAppId}
       modelLabel={props.modelLabel}
+      modelSignedOut={props.modelSignedOut}
       runtimeIsRunning={props.runtimeIsRunning}
       agents={props.agents}
       canSend={props.canSend}
@@ -116,7 +112,7 @@ export function ChatSurface(props: ChatSurfaceProps) {
       >
         {dragActive ? (
           <div className="chat-drop-active pointer-events-none absolute inset-0 z-20 grid place-items-center border-2 border-dashed border-[var(--accent-line)]">
-            <div className="flex items-center gap-3 rounded-[var(--radius-control)] border border-[var(--accent-line)] bg-[var(--surface-strong)] px-4 py-2 text-sm font-medium text-[var(--accent-text)] shadow-[var(--shadow-card)]">
+            <div className="flex items-center gap-3 rounded-[var(--radius-panel)] border border-[var(--accent-line)] bg-[var(--surface-strong)] px-4 py-2.5 text-sm font-medium text-[var(--accent-text)] shadow-[var(--shadow-popover)]">
               <ImagePlus className="size-4" />
               {t("Drop to attach images")}
             </div>
@@ -134,15 +130,6 @@ export function ChatSurface(props: ChatSurfaceProps) {
         ) : (
           <>
             <MessageFeed
-              header={
-                <SessionHeader
-                  title={props.activeSessionTitle ?? t("Task")}
-                  agent={props.boundAgent}
-                  agents={props.agents}
-                  modelLabel={props.modelLabel}
-                  onOpenSettings={props.onOpenSettings}
-                />
-              }
               messages={props.messages}
               runningMessage={props.runningMessage}
               turnsById={props.turnsById}
@@ -168,60 +155,6 @@ export function ChatSurface(props: ChatSurfaceProps) {
           onOpenSettings={props.onOpenSettings}
         />
       ) : null}
-    </div>
-  );
-}
-
-function SessionHeader({
-  title,
-  agent,
-  agents,
-  modelLabel,
-  onOpenSettings,
-}: {
-  title: string;
-  agent: AgentAppConfig | null;
-  agents: AgentAppConfig[];
-  modelLabel: string | null;
-  onOpenSettings: (target: SettingsTarget) => void;
-}) {
-  const finishHooks = hookAgentNames(agent?.onFinishHook.agentAppIds, agents);
-  const startHooks = hookAgentNames(agent?.onStartHook.agentAppIds, agents);
-  return (
-    <div className="flex flex-col gap-2 border-b border-[var(--line-soft)] pb-4">
-      <h1 className="m-0 text-[20px] font-semibold leading-7 tracking-[-0.01em] text-[var(--text-strong)]">{title}</h1>
-      <div className="flex flex-wrap gap-1.5">
-        <button type="button" className="meta-chip" title={t("Edit agents in Settings")} onClick={() => onOpenSettings("agents")}>
-          <Bot className="size-[13px] shrink-0" />
-          <span>{agent?.name ?? t("No agent bound")}</span>
-        </button>
-        {modelLabel ? (
-          <span className="meta-chip">
-            <KeyRound className="size-[13px] shrink-0" />
-            <span>{modelLabel}</span>
-          </span>
-        ) : null}
-        {agent?.contextRoots.length ? (
-          <span className="meta-chip" title={agent.contextRoots.join("\n")}>
-            <FolderOpen className="size-[13px] shrink-0" />
-            <span className="mono">
-              {agent.contextRoots.length === 1 ? agent.contextRoots[0] : t("{count} context folders", { count: agent.contextRoots.length })}
-            </span>
-          </span>
-        ) : null}
-        {startHooks.length ? (
-          <span className="meta-chip">
-            <GitBranch className="size-[13px] shrink-0" />
-            <span>{t("Before → {agents}", { agents: startHooks.join(", ") })}</span>
-          </span>
-        ) : null}
-        {finishHooks.length ? (
-          <span className="meta-chip">
-            <GitBranch className="size-[13px] shrink-0" />
-            <span>{t("After → {agents}", { agents: finishHooks.join(", ") })}</span>
-          </span>
-        ) : null}
-      </div>
     </div>
   );
 }

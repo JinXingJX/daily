@@ -1,168 +1,180 @@
 /* ---- Tokens ----
- * Graphite neutrals with one cobalt accent. Green, amber and red only carry run state and are
- * always paired with an icon or text. Lines are solid so they read the same on every surface.
+ * Warm paper neutrals, ink text and one clay accent. Green, amber and red only carry run state and
+ * are always paired with an icon or text. DESIGN.md documents every token and when to use it.
  */
 
 :root {
   color-scheme: light;
-  --font-geist-sans: "Geist", "Geist Sans", -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
-    "Noto Sans SC", "Segoe UI", system-ui, sans-serif;
-  --font-geist-mono: "Geist Mono", "SFMono-Regular", "SF Mono", ui-monospace, "Roboto Mono", monospace;
-  font-family: var(--font-geist-sans);
 
-  --chrome: #f5f5f3;
-  --app-body-bg: #f5f5f3;
-  --app-shell-bg: #f5f5f3;
-  --app-rail-bg: #f5f5f3;
-  --app-sidebar-bg: #f5f5f3;
-  --app-main-bg: #ffffff;
-  --surface: #fafaf9;
+  /* Type. Serif is for display titles and agent prose only; every control is sans. */
+  --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI",
+    "Noto Sans SC", system-ui, sans-serif;
+  --font-serif: "Iowan Old Style", Charter, Cambria, Georgia, "Songti SC", "Noto Serif SC", "Source Han Serif SC", serif;
+  --font-mono: "SF Mono", SFMono-Regular, ui-monospace, Menlo, Consolas, monospace;
+  --font-reading: var(--font-serif);
+  font-family: var(--font-sans);
+
+  /* Surfaces, from the canvas up. */
+  --app-main-bg: #faf9f5;
+  --app-sidebar-bg: #f5f4ed;
+  --app-body-bg: var(--app-main-bg);
+  --app-shell-bg: var(--app-main-bg);
+  --app-rail-bg: var(--app-main-bg);
+  --chrome: var(--app-sidebar-bg);
+  --surface: #f5f4ed;
   --surface-strong: #ffffff;
-  --surface-muted: #f3f3f1;
-  --surface-inset: #efefec;
-  --message-user-bg: #f5f5f3;
-  --code-bg: #f0f0ed;
-  --terminal-bg: #18181a;
-  --terminal-text: #d6d6d2;
+  --surface-muted: #f0eee6;
+  --surface-inset: #e8e6dc;
+  --message-user-bg: #f0eee6;
+  --code-bg: #f0eee6;
+  --terminal-bg: #1f1e1d;
+  --terminal-text: #dedcd1;
+  --fill-hover: rgba(20, 20, 19, 0.05);
+  --fill-active: rgba(20, 20, 19, 0.08);
+  /* Segmented controls: the track and the selected segment riding on it. */
+  --segment-track: #f0eee6;
+  --segment-thumb: #ffffff;
 
-  --line: #e4e4e0;
-  --line-soft: #ededea;
-  --line-strong: #d3d3cf;
-  --line-active: #b5b5b0;
+  --line: #dedcd1;
+  --line-soft: #e8e6dc;
+  --line-strong: #d1cfc5;
+  --line-active: #b0aea5;
 
-  --text-strong: #18181a;
-  --text: #2b2b2e;
-  --text-soft: #55565b;
-  --text-muted: #6a6b71;
-  --text-disabled: #a3a39e;
+  --text-strong: #141413;
+  --text: #3d3d3a;
+  --text-soft: #5e5d59;
+  --text-muted: #6b6a64;
+  --text-disabled: #9c9a92;
 
-  --primary: #18181a;
-  --primary-hover: #2e2e33;
-  --primary-contrast: #ffffff;
-  --accent: #1f5fe0;
-  --accent-hover: #1a50c2;
-  --accent-text: #1a50c2;
+  /* Ink carries text buttons; clay carries icon-only emphasis, selection and focus. */
+  --primary: #141413;
+  --primary-hover: #30302e;
+  --primary-contrast: #faf9f5;
+  --accent: #d97757;
+  --accent-hover: #c6613f;
+  --accent-strong: #c6613f;
+  --accent-text: #b5532f;
   --accent-contrast: #ffffff;
-  --accent-soft: #eaf0fd;
-  --accent-soft-hover: #dce6fb;
-  --accent-line: #bfd0f7;
+  --accent-soft: #f6e9e2;
+  --accent-soft-hover: #f3dfd5;
+  --accent-line: #edc5b6;
 
-  --danger: #a61f26;
-  --danger-fill: #c0262d;
-  --danger-soft: #fcebec;
-  --danger-line: #f2d0d2;
+  --danger: #a8322a;
+  --danger-fill: #c0453b;
+  --danger-soft: #f8e6e2;
+  --danger-line: #ebc4bd;
   --danger-contrast: #ffffff;
-  --warning: #8a5100;
-  --warning-fill: #c27a0a;
-  --warning-soft: #fbf1de;
-  --warning-line: #f0d9a8;
-  --success: #1e7a3c;
-  --success-fill: #1e9c49;
-  --success-soft: #e7f4ea;
-  --success-line: #b9dfc4;
+  --warning: #7d5a00;
+  --warning-fill: #c08a1e;
+  --warning-soft: #f7edd3;
+  --warning-line: #e8d5a0;
+  --success: #3f6b2f;
+  --success-fill: #558a42;
+  --success-soft: #e9f0e0;
+  --success-line: #c5d8b5;
   --info: var(--accent-text);
 
-  --tone-writer: #6741d9;
-  --tone-writer-soft: #f2eefc;
-  --tone-market: #c2410c;
-  --tone-market-soft: #fdf0e8;
-  --tone-neutral: #55565b;
-  --tone-neutral-soft: #f0f0ed;
+  --tone-writer: #6b4d9e;
+  --tone-writer-soft: #efeaf5;
+  --tone-market: #b5532f;
+  --tone-market-soft: #f6e9e2;
+  --tone-neutral: #5e5d59;
+  --tone-neutral-soft: #f0eee6;
 
-  --geist-gray-alpha-100: rgba(24, 24, 26, 0.05);
-  --geist-gray-alpha-200: rgba(24, 24, 26, 0.09);
-  --overlay: rgba(24, 24, 26, 0.32);
-  --scrollbar-thumb: rgba(24, 24, 26, 0.2);
-  --shadow-color: rgba(24, 24, 26, 0.08);
-  --shadow-card: 0 1px 1px rgba(24, 24, 26, 0.04);
-  --shadow-raised: 0 0 0 1px var(--line), 0 1px 2px rgba(24, 24, 26, 0.05);
-  --shadow-popover: 0 0 0 1px var(--line), 0 12px 32px -8px rgba(24, 24, 26, 0.18);
-  --shadow-modal: 0 0 0 1px rgba(24, 24, 26, 0.08), 0 24px 48px -12px rgba(24, 24, 26, 0.35);
-  --shadow-composer: 0 1px 1px rgba(24, 24, 26, 0.03), 0 8px 20px -10px rgba(24, 24, 26, 0.14);
-  --focus-ring: 0 0 0 2px var(--app-main-bg), 0 0 0 4px var(--accent);
+  --overlay: rgba(20, 20, 19, 0.32);
+  --scrollbar-thumb: rgba(20, 20, 19, 0.2);
+  --shadow-color: rgba(20, 20, 19, 0.08);
+  --shadow-card: 0 1px 2px rgba(20, 20, 19, 0.04);
+  --shadow-raised: 0 0 0 1px var(--line), 0 1px 2px rgba(20, 20, 19, 0.05);
+  --shadow-popover: 0 0 0 1px var(--line), 0 12px 32px -8px rgba(20, 20, 19, 0.16);
+  --shadow-modal: 0 0 0 1px rgba(20, 20, 19, 0.08), 0 24px 56px -12px rgba(20, 20, 19, 0.28);
+  --shadow-composer: 0 4px 20px rgba(20, 20, 19, 0.04), 0 1px 2px rgba(20, 20, 19, 0.03);
+  --focus-ring: 0 0 0 2px var(--app-main-bg), 0 0 0 4px var(--accent-strong);
 
   --duration-fast: 150ms;
   --duration-med: 200ms;
   --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
-  --radius-control: 6px;
-  --radius-panel: 8px;
-  --radius-popover: 12px;
+  --radius-control: 8px;
+  --radius-chip: 10px;
+  --radius-panel: 12px;
+  --radius-popover: 14px;
+  --radius-bubble: 18px;
+  --radius-composer: 20px;
   --radius-full: 9999px;
 
   --titlebar-height: 44px;
-  --statusbar-height: 26px;
-  --rail-width: 56px;
+  --rail-width: 52px;
   --traffic-light-safe: 78px;
 }
 
 html[data-theme="dark"] {
   color-scheme: dark;
-  --chrome: #121214;
-  --app-body-bg: #121214;
-  --app-shell-bg: #121214;
-  --app-rail-bg: #121214;
-  --app-sidebar-bg: #121214;
-  --app-main-bg: #18181b;
-  --surface: #1c1c1f;
-  --surface-strong: #212125;
-  --surface-muted: #232327;
-  --surface-inset: #0f0f11;
-  --message-user-bg: #232327;
-  --code-bg: #2a2a2f;
-  --terminal-bg: #0e0e10;
-  --terminal-text: #d6d6d2;
 
-  --line: #2a2a2e;
-  --line-soft: #242428;
-  --line-strong: #36363b;
-  --line-active: #4a4a50;
+  --app-main-bg: #262624;
+  --app-sidebar-bg: #1f1e1d;
+  --surface: #2b2b29;
+  --surface-strong: #30302e;
+  --surface-muted: #353533;
+  --surface-inset: #1a1918;
+  --message-user-bg: #1a1918;
+  --code-bg: #353533;
+  --terminal-bg: #1a1918;
+  --terminal-text: #dedcd1;
+  --fill-hover: rgba(250, 249, 245, 0.06);
+  --fill-active: rgba(250, 249, 245, 0.1);
+  --segment-track: #1a1918;
+  --segment-thumb: #4d4c48;
 
-  --text-strong: #f2f2f3;
-  --text: #e2e2e5;
-  --text-soft: #b4b4bb;
-  --text-muted: #8e8e96;
-  --text-disabled: #5e5e66;
+  --line: #3d3d3a;
+  --line-soft: #353533;
+  --line-strong: #4d4c48;
+  --line-active: #5e5d59;
 
-  --primary: #f2f2f3;
+  --text-strong: #faf9f5;
+  --text: #dedcd1;
+  --text-soft: #b0aea5;
+  --text-muted: #9c9a92;
+  --text-disabled: #73726c;
+
+  --primary: #faf9f5;
   --primary-hover: #ffffff;
-  --primary-contrast: #18181a;
-  --accent: #7c9bff;
-  --accent-hover: #9bb3ff;
-  --accent-text: #9bb3ff;
-  --accent-contrast: #0e0e10;
-  --accent-soft: rgba(124, 155, 255, 0.14);
-  --accent-soft-hover: rgba(124, 155, 255, 0.22);
-  --accent-line: rgba(124, 155, 255, 0.4);
+  --primary-contrast: #141413;
+  --accent: #d97757;
+  --accent-hover: #e08b6d;
+  --accent-strong: #e08b6d;
+  --accent-text: #e8997d;
+  --accent-contrast: #ffffff;
+  --accent-soft: rgba(217, 119, 87, 0.16);
+  --accent-soft-hover: rgba(217, 119, 87, 0.24);
+  --accent-line: rgba(217, 119, 87, 0.42);
 
-  --danger: #ff8a80;
-  --danger-fill: #e5534a;
-  --danger-soft: rgba(229, 83, 74, 0.14);
-  --danger-line: rgba(229, 83, 74, 0.4);
+  --danger: #f0958b;
+  --danger-fill: #c0453b;
+  --danger-soft: rgba(192, 69, 59, 0.18);
+  --danger-line: rgba(192, 69, 59, 0.45);
   --danger-contrast: #ffffff;
-  --warning: #f5b161;
-  --warning-fill: #e0951f;
-  --warning-soft: rgba(224, 149, 31, 0.14);
-  --warning-line: rgba(224, 149, 31, 0.4);
-  --success: #6fd29c;
-  --success-fill: #34b26b;
-  --success-soft: rgba(52, 178, 107, 0.16);
-  --success-line: rgba(52, 178, 107, 0.4);
+  --warning: #e0b95b;
+  --warning-fill: #c99a2e;
+  --warning-soft: rgba(201, 154, 46, 0.16);
+  --warning-line: rgba(201, 154, 46, 0.4);
+  --success: #9bc184;
+  --success-fill: #6a9a55;
+  --success-soft: rgba(106, 154, 85, 0.18);
+  --success-line: rgba(106, 154, 85, 0.4);
 
-  --tone-writer: #a993ff;
-  --tone-writer-soft: rgba(169, 147, 255, 0.14);
-  --tone-market: #ff8a52;
-  --tone-market-soft: rgba(255, 138, 82, 0.14);
-  --tone-neutral: #b4b4bb;
-  --tone-neutral-soft: rgba(255, 255, 255, 0.06);
+  --tone-writer: #b7a3dc;
+  --tone-writer-soft: rgba(183, 163, 220, 0.14);
+  --tone-market: #e8997d;
+  --tone-market-soft: rgba(217, 119, 87, 0.16);
+  --tone-neutral: #b0aea5;
+  --tone-neutral-soft: rgba(250, 249, 245, 0.06);
 
-  --geist-gray-alpha-100: rgba(255, 255, 255, 0.05);
-  --geist-gray-alpha-200: rgba(255, 255, 255, 0.09);
   --overlay: rgba(0, 0, 0, 0.55);
-  --scrollbar-thumb: rgba(255, 255, 255, 0.18);
+  --scrollbar-thumb: rgba(250, 249, 245, 0.18);
   --shadow-color: rgba(0, 0, 0, 0.4);
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-raised: 0 0 0 1px var(--line-strong), 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-popover: 0 0 0 1px var(--line-strong), 0 12px 32px -8px rgba(0, 0, 0, 0.6);
   --shadow-modal: 0 0 0 1px var(--line-strong), 0 24px 64px -12px rgba(0, 0, 0, 0.7);
-  --shadow-composer: 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  --shadow-composer: 0 8px 24px rgba(0, 0, 0, 0.25);
 }

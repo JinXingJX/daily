@@ -199,9 +199,9 @@ export function AgentSettings({
               <div className="flex max-w-[44rem] flex-col gap-7">
                 <div className="flex items-start gap-3">
                   <div className="min-w-0 flex-1">
-                    <h1 className="m-0 truncate text-[20px] font-semibold leading-7 tracking-[-0.01em] text-[var(--text-strong)]">
+                    <h2 className="m-0 truncate text-[16px] font-semibold leading-6 text-[var(--text-strong)]">
                       {agentDraft.name || t("Untitled agent")}
-                    </h1>
+                    </h2>
                     <p className="settings-section-detail">{t("Save after editing. In a chat you can switch agents next to the input at any time.")}</p>
                   </div>
                   <Button

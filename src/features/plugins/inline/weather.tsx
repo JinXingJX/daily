@@ -42,9 +42,9 @@ function WeatherCard({ payload }: { payload: WeatherPayload }) {
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
           <div className="text-sm font-medium text-[var(--text-muted)]">{payload.location}</div>
-          <div className="text-2xl font-semibold text-[var(--text-strong)]">{payload.condition}</div>
+          <div className="font-serif text-2xl font-normal text-[var(--text-strong)]">{payload.condition}</div>
         </div>
-        <div className="text-3xl font-semibold text-[var(--text-strong)]">{payload.temperatureC}°C</div>
+        <div className="text-3xl font-normal tabular-nums text-[var(--text-strong)]">{payload.temperatureC}°C</div>
       </div>
       {payload.forecast?.length ? (
         <div className="grid gap-3 md:grid-cols-[repeat(auto-fit,minmax(120px,1fr))]">

@@ -1,7 +1,7 @@
-import { RotateCcw, Sparkles } from "lucide-react";
-import type { PluginTheme, PluginViewContext } from "@daily/plugin-sdk";
+import { CircleAlert, RotateCcw } from "lucide-react";
+import { pluginDesignStyles, type PluginTheme, type PluginViewContext } from "@daily/plugin-sdk";
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
-import { Kicker } from "@/components/app/Section";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import type { PluginMainView } from "@/features/workspace/Sidebar";
 import { t } from "@/i18n";
@@ -153,7 +153,7 @@ function PluginViewSurface({ item, active, theme }: { item: PluginMainView; acti
     <div className={active ? "relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden" : "hidden"}>
       <div ref={hostRef} data-plugin-view={viewKey(plugin.identifier, view.id)} data-daily-theme={theme} className="relative block min-h-0 min-w-0 flex-1" />
       {state.status === "ready" ? null : (
-        <div className="absolute inset-0 flex bg-[var(--surface)]">
+        <div className="absolute inset-0 flex bg-[var(--app-main-bg)]">
           {state.status === "loading" ? (
             <PluginViewNotice item={item} title={t("Loading plugin")} detail={t("Loading the plugin module.")} />
           ) : (
@@ -209,8 +209,8 @@ function baseSheet() {
   if (!sharedBaseSheet) {
     sharedBaseSheet = new CSSStyleSheet();
     sharedBaseSheet.replaceSync(`
-      :host { all: initial; color-scheme: light; background: Canvas; color: CanvasText; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Segoe UI", sans-serif; }
-      :host(:where([data-daily-theme="dark"])) { color-scheme: dark; }
+      :host { all: initial; }
+      ${pluginDesignStyles}
       #root { position: absolute; inset: 0; overflow: hidden; outline: none; contain: layout paint style; container: daily-view / size; }
       button, input, textarea, select { font: inherit; }
     `);
@@ -220,19 +220,15 @@ function baseSheet() {
 
 function PluginViewNotice({ item, title, detail, action }: { item: PluginMainView; title: string; detail: string; action?: ReactNode }) {
   return (
-    <div className="grid min-h-0 flex-1 place-items-center p-6">
-      <section className="w-full max-w-xl border-y border-[var(--line)] bg-transparent py-6">
-        <div className="flex items-start gap-3">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-control)] bg-[var(--surface-muted)] text-[var(--text-soft)]">
-            <Sparkles className="size-5" />
-          </div>
-          <div className="min-w-0">
-            <Kicker>{item.plugin.identifier} / {item.view.id}</Kicker>
-            <h1 className="mt-2 text-lg font-semibold text-[var(--text-strong)]">{title}</h1>
-            <p className="mt-2 whitespace-pre-line break-words text-sm leading-6 text-[var(--text-muted)]">{detail}</p>
-            {action ? <div className="mt-4">{action}</div> : null}
-          </div>
-        </div>
+    <div className="grid min-h-0 flex-1 place-items-center p-8" role={action ? "alert" : "status"}>
+      <section className="w-full max-w-lg py-6">
+        {action ? <CircleAlert className="mb-4 size-6 text-[var(--danger)]" /> : (
+          <div className="mb-6 space-y-3" aria-hidden="true"><Skeleton className="mb-6 h-8 w-1/2" /><Skeleton className="h-3 w-full" /><Skeleton className="h-3 w-3/4" /></div>
+        )}
+        <p className="text-xs text-[var(--text-muted)]">{item.plugin.name}</p>
+        <h1 className="mt-2 font-serif text-[30px] leading-[38px] font-normal text-[var(--text-strong)]">{title}</h1>
+        <p className="mt-3 whitespace-pre-line break-words text-sm leading-6 text-[var(--text-soft)]">{detail}</p>
+        {action ? <div className="mt-5">{action}</div> : null}
       </section>
     </div>
   );

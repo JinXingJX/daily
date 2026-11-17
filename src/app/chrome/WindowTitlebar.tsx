@@ -1,4 +1,5 @@
-import { CircleAlert, CirclePause, LoaderCircle, PanelLeft, PanelRight, Search } from "lucide-react";
+import { CircleAlert, CirclePause, LoaderCircle, PanelLeft, PanelRight } from "lucide-react";
+import type { ReactNode } from "react";
 import { useNowSec } from "@/app/useNowSec";
 import { formatElapsed, turnProgress, turnRunState } from "@/features/chat/turnProgress";
 import type { AgentTurnView } from "@/types";
@@ -7,62 +8,47 @@ import { t } from "@/i18n";
 export function WindowTitlebar({
   leadWidth,
   panelVisible,
-  panelToggleAvailable,
-  contextLabel,
   activeLabel,
   runTurn,
+  actions,
   inspectorAvailable,
   inspectorOpen,
-  onCommandOpen,
   onToggleInspector,
   onTogglePanel,
 }: {
-  /** Width of the segment above the rail and task panel, so the two columns line up. */
+  /** Width of the segment above the sidebar, so the two columns line up. */
   leadWidth: number;
   panelVisible: boolean;
-  panelToggleAvailable: boolean;
-  contextLabel: string | null;
   activeLabel: string;
   /** Latest turn of the open session; its run state is shown when not completed. */
   runTurn: AgentTurnView | null;
+  /** Controls placed before the inspector toggle. */
+  actions?: ReactNode;
   inspectorAvailable: boolean;
   inspectorOpen: boolean;
-  onCommandOpen: () => void;
   onToggleInspector: () => void;
   onTogglePanel: () => void;
 }) {
+  const toggleLabel = panelVisible ? t("Hide task panel") : t("Show task panel");
   return (
     <header className="window-titlebar app-drag relative z-30 flex shrink-0">
-      <div className="titlebar-lead" style={{ width: leadWidth }}>
-        {panelToggleAvailable ? (
-          <button
-            className="titlebar-icon"
-            type="button"
-            aria-label={panelVisible ? t("Hide task panel") : t("Show task panel")}
-            aria-pressed={!panelVisible}
-            title={panelVisible ? t("Hide task panel") : t("Show task panel")}
-            onClick={onTogglePanel}
-          >
-            <PanelLeft className="size-4" />
-          </button>
-        ) : null}
+      <div className="titlebar-lead" data-panel={panelVisible ? "open" : "closed"} style={{ width: leadWidth }}>
+        {panelVisible ? <span className="titlebar-brand">Daily</span> : <span />}
+        <button
+          className="titlebar-icon"
+          type="button"
+          aria-label={toggleLabel}
+          aria-expanded={panelVisible}
+          title={toggleLabel}
+          onClick={onTogglePanel}
+        >
+          <PanelLeft className="size-4" />
+        </button>
       </div>
       <div className="titlebar-main">
-        <nav aria-label={t("Location")} className="flex min-w-0 flex-1 items-center gap-2">
-          {contextLabel ? (
-            <>
-              <span className="shrink-0 text-[var(--text-muted)]">{contextLabel}</span>
-              <span className="shrink-0 text-[var(--line-active)]" aria-hidden="true">/</span>
-            </>
-          ) : null}
-          <span className="truncate font-medium text-[var(--text-strong)]">{activeLabel}</span>
-        </nav>
+        <h1 className="titlebar-title">{activeLabel}</h1>
         {runTurn ? <RunPill turn={runTurn} /> : null}
-        <button className="titlebar-command" type="button" title={t("Search tasks and commands")} onClick={onCommandOpen}>
-          <Search className="size-3.5" />
-          <span className="hidden md:inline">{t("Search tasks and commands")}</span>
-          <kbd className="kbd">⌘K</kbd>
-        </button>
+        {actions}
         {inspectorAvailable ? (
           <button
             className="titlebar-icon"
@@ -95,7 +81,9 @@ function RunPill({ turn }: { turn: AgentTurnView }) {
             <span>{t("Step {step}", { step: run.currentStep })}</span>
           </>
         ) : null}
-        {run.elapsedSec != null ? <span className="mono font-normal">{formatElapsed(run.elapsedSec)}</span> : null}
+        {run.elapsedSec != null ? (
+          <span className="mono font-normal text-[var(--text-muted)]">{formatElapsed(run.elapsedSec)}</span>
+        ) : null}
       </div>
     );
   }

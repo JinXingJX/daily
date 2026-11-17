@@ -1,8 +1,14 @@
-import { type ReactNode, useMemo, useState } from "react";
-import { motion } from "motion/react";
+import type { ReactNode } from "react";
 import { AlertTriangle } from "lucide-react";
+import { t } from "@/i18n";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+
+function pluginLabel(label: string) {
+  if (label === "Chart") return t("Chart");
+  if (label === "Weather") return t("Weather");
+  if (label === "Plugin") return t("Plugin");
+  return label;
+}
 
 export function PluginShell(props: {
   identifier: string;
@@ -13,80 +19,34 @@ export function PluginShell(props: {
   children: ReactNode;
 }) {
   return (
-    <motion.section
-      layout
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-      className="workbench-panel overflow-hidden"
-    >
-      <div className="flex items-center justify-between gap-4 px-5 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-[var(--radius-control)] bg-[var(--surface-muted)] text-[var(--text-soft)]">
-            {props.icon}
-          </div>
-          <div className="space-y-1">
-            <div className="font-medium text-[var(--text-strong)]">{props.label}</div>
-            <div className="text-xs font-medium text-[var(--text-muted)]">{props.identifier}</div>
-          </div>
+    <section className="workbench-panel overflow-hidden" aria-busy={props.partial || undefined}>
+      <header className="flex items-center justify-between gap-4 border-b border-[var(--line-soft)] px-4 py-3">
+        <div className="flex items-center gap-2 text-sm font-medium text-[var(--text-strong)]">
+          <span className="flex size-4 items-center justify-center text-[var(--text-soft)]">{props.icon}</span>
+          {pluginLabel(props.label)}
         </div>
-        <Badge variant={props.partial ? "success" : "secondary"}>
-          {props.partial ? "Streaming" : "Interactive"}
-        </Badge>
-      </div>
-      <div className="space-y-4 p-5">{props.children}</div>
-      {props.partial ? (
-        <pre className="overflow-x-auto bg-[var(--surface-muted)] px-5 py-4 text-xs leading-6 text-[var(--text-soft)]">
-          {props.source?.trim() || "{ … }"}
-        </pre>
-      ) : null}
-    </motion.section>
+        <Badge variant="secondary">{props.partial ? t("Streaming") : t("Interactive")}</Badge>
+      </header>
+      <div className="space-y-4 p-4">{props.children}</div>
+    </section>
   );
 }
 
 export function PluginFallback(props: { identifier: string; source: string; reason: string }) {
-  const [attempt, setAttempt] = useState(0);
-  const result = useMemo(() => {
-    try {
-      return JSON.parse(props.source);
-    } catch {
-      return null;
-    }
-  }, [props.source, attempt]);
-
   return (
-    <motion.section
-      layout
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
-      className="workbench-panel overflow-hidden"
-    >
-      <div className="flex items-center justify-between gap-4 px-5 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-[var(--radius-control)] bg-[var(--surface-muted)] text-[var(--danger)]">
-            <AlertTriangle className="size-4" />
-          </div>
-          <div className="space-y-1">
-            <div className="font-medium text-[var(--text-strong)]">Plugin Parse Error</div>
-            <div className="text-xs font-medium text-[var(--text-muted)]">{props.identifier}</div>
-          </div>
-        </div>
-        <Button size="sm" variant="secondary" onClick={() => setAttempt((value) => value + 1)}>
-          Retry
-        </Button>
-      </div>
-      <div className="space-y-3 px-5 py-4 text-sm text-[var(--text)]">
-        <p>{props.reason}</p>
-        <div className="text-[var(--text-muted)]">
-          {result
-            ? "JSON is valid, but the payload shape does not match the registered schema."
-            : "Raw payload is shown below so the conversation remains intact."}
+    <section className="workbench-panel overflow-hidden">
+      <div className="flex items-start gap-3 px-4 py-4" role="alert">
+        <AlertTriangle className="mt-0.5 size-4 shrink-0 text-[var(--danger)]" />
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-[var(--text-strong)]">{t("Could not display this result")}</p>
+          <p className="text-sm text-[var(--text-soft)]">{t("The original result is preserved below.")}</p>
         </div>
       </div>
-      <pre className="overflow-x-auto bg-[var(--surface-muted)] px-5 py-4 text-xs leading-6 text-[var(--text-soft)]">
-        {props.source}
-      </pre>
-    </motion.section>
+      <details className="border-t border-[var(--line)] px-4 py-3">
+        <summary className="min-h-8 cursor-pointer rounded-[var(--radius-control)] text-sm text-[var(--text-soft)]">{t("Original result")}</summary>
+        <p className="mt-2 text-xs text-[var(--text-muted)]">{props.identifier}: {props.reason}</p>
+        <pre className="mt-3 overflow-x-auto whitespace-pre-wrap break-words rounded-[var(--radius-control)] bg-[var(--surface)] p-3 font-mono text-xs leading-6 text-[var(--text)]">{props.source}</pre>
+      </details>
+    </section>
   );
 }

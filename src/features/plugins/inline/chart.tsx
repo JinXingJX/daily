@@ -1,5 +1,5 @@
-import { motion } from "motion/react";
 import { BarChart3 } from "lucide-react";
+import { t } from "@/i18n";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isRecord, type PluginSpec } from "@/features/plugins/inline/types";
@@ -39,10 +39,10 @@ function ChartCard({ payload }: { payload: ChartPayload }) {
     <div className="space-y-5">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <div className="text-lg font-semibold text-[var(--text-strong)]">{payload.title}</div>
-          <div className="text-sm text-[var(--text-muted)]">Primary Series: {series.name}</div>
+          <div className="font-serif text-2xl font-normal text-[var(--text-strong)]">{payload.title}</div>
+          <div className="text-sm text-[var(--text-muted)]">{series.name}</div>
         </div>
-        <Badge variant="secondary">{titleCaseToken(payload.type)}</Badge>
+        <Badge variant="secondary">{payload.type === "bar" ? t("Bar chart") : payload.type === "line" ? t("Line chart") : t("Area chart")}</Badge>
       </div>
       <div className="grid min-h-48 grid-cols-[repeat(auto-fit,minmax(72px,1fr))] gap-4">
         {payload.labels.map((label, index) => {
@@ -51,11 +51,9 @@ function ChartCard({ payload }: { payload: ChartPayload }) {
           return (
             <div className="grid justify-items-center gap-2" key={`${label}-${index}`}>
               <div className="flex min-h-36 w-full items-end rounded-[var(--radius-control)] bg-[var(--surface-muted)] p-1.5">
-                <motion.div
-                  initial={{ height: 0 }}
-                  animate={{ height }}
-                  transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-                  className="w-full rounded-[var(--radius-control)] bg-[var(--accent)]"
+                <div
+                  style={{ height }}
+                  className="w-full rounded-[var(--radius-control)] bg-[var(--text-soft)]"
                 />
               </div>
               <div className="font-mono text-sm text-[var(--text-strong)]">{value}</div>
@@ -93,14 +91,6 @@ function ChartSkeleton() {
   );
 }
 
-
-function titleCaseToken(value: string) {
-  return value
-    .split(/[_\s-]+/)
-    .filter(Boolean)
-    .map((part) => `${part.slice(0, 1).toUpperCase()}${part.slice(1)}`)
-    .join(" ");
-}
 
 export const chartSpec: PluginSpec<ChartPayload> = {
   pluginId: "builtin.chart",

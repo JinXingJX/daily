@@ -9,11 +9,11 @@ import {
   type TurnProgress,
   type TurnStep,
 } from "@/features/chat/turnProgress";
+import { DailyMark } from "@/components/app/DailyMark";
 import { cn } from "@/lib/utils";
 import type { AgentEventView, AgentTurnView } from "@/types";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
-  Bot,
   Check,
   ChevronDown,
   CircleAlert,
@@ -33,7 +33,6 @@ export const ChatRenderer = lazy(() =>
 );
 
 export const MessageFeed = memo(function MessageFeed({
-  header,
   messages,
   runningMessage,
   turnsById,
@@ -43,7 +42,6 @@ export const MessageFeed = memo(function MessageFeed({
   continuableTurnId,
   onContinue,
 }: {
-  header: ReactNode;
   messages: RenderMessage[];
   runningMessage: RenderMessage | null;
   turnsById: Map<number, AgentTurnView>;
@@ -70,16 +68,40 @@ export const MessageFeed = memo(function MessageFeed({
     overscan: 6,
   });
 
+  // The feed follows new output only while the reader is at the bottom; scrolling up to read
+  // earlier steps is never interrupted. A new message always brings the reader back down.
+  const followRef = useRef(true);
+  const contentRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
-    if (!parentRef.current) {
+    followRef.current = true;
+  }, [itemCount]);
+
+  useEffect(() => {
+    const element = parentRef.current;
+    if (!element || !followRef.current) {
       return;
     }
     if (useVirtualization && itemCount > 0) {
       virtualizer.scrollToIndex(itemCount - 1, { align: "end" });
       return;
     }
-    parentRef.current.scrollTop = parentRef.current.scrollHeight;
+    element.scrollTop = element.scrollHeight;
   }, [itemCount, messages, runningMessage, useVirtualization, virtualizer]);
+
+  // Markdown, code highlighting and step output finish laying out after the message arrives.
+  useEffect(() => {
+    const element = parentRef.current;
+    const content = contentRef.current;
+    if (!element || !content || useVirtualization || typeof ResizeObserver === "undefined") {
+      return;
+    }
+    const observer = new ResizeObserver(() => {
+      if (followRef.current) element.scrollTop = element.scrollHeight;
+    });
+    observer.observe(content);
+    return () => observer.disconnect();
+  }, [useVirtualization]);
 
   const card = (message: RenderMessage, animated: boolean) => (
     <MessageCard
@@ -96,8 +118,14 @@ export const MessageFeed = memo(function MessageFeed({
   );
 
   return (
-    <div className="min-h-0 flex-1 overflow-auto px-6 pb-6 pt-7 sm:px-8" ref={parentRef}>
-      <div className="mx-auto mb-6 w-full max-w-[45rem]">{header}</div>
+    <div
+      className="min-h-0 flex-1 overflow-auto px-6 pb-6 pt-5 sm:px-8"
+      ref={parentRef}
+      onScroll={(event) => {
+        const element = event.currentTarget;
+        followRef.current = element.scrollHeight - element.scrollTop - element.clientHeight < 80;
+      }}
+    >
       {useVirtualization ? (
         <div className="relative mx-auto w-full max-w-[45rem]" style={{ height: virtualizer.getTotalSize() }}>
           {virtualizer.getVirtualItems().map((item) => {
@@ -119,7 +147,7 @@ export const MessageFeed = memo(function MessageFeed({
           })}
         </div>
       ) : (
-        <div className="mx-auto flex w-full max-w-[45rem] flex-col gap-6 pb-4">
+        <div ref={contentRef} className="mx-auto flex w-full max-w-[45rem] flex-col gap-[22px] pb-4">
           <AnimatePresence initial={false}>
             {messages.map((message) => card(message, true))}
             {runningMessage ? card(runningMessage, true) : null}
@@ -165,8 +193,8 @@ export const MessageCard = memo(function MessageCard(props: {
       initial={animated ? { opacity: 0, y: 10 } : false}
       animate={animated ? { opacity: 1, y: 0 } : undefined}
       exit={animated ? { opacity: 0, y: -6 } : undefined}
-      transition={animated ? { duration: 0.18, ease: [0.22, 1, 0.36, 1] } : undefined}
-      className="group flex w-full flex-col gap-2.5"
+      transition={animated ? { duration: 0.2, ease: [0.25, 1, 0.5, 1] } : undefined}
+      className={cn("group flex w-full flex-col gap-2.5", !isAssistant && "items-end")}
       aria-label={isAssistant ? (live ? t("Agent reply (streaming)") : t("Agent reply")) : t("Your message")}
     >
       {isAssistant ? (
@@ -180,7 +208,7 @@ export const MessageCard = memo(function MessageCard(props: {
           ) : null}
           {continuable ? (
             <div className="recovery-panel">
-              <span className="min-w-0 flex-[1_1_16rem] text-[12px] leading-5 text-[var(--text-soft)]">
+              <span className="min-w-0 flex-[1_1_16rem] text-[13px] leading-5 text-[var(--text-soft)]">
                 {t("Continuing keeps the {count} completed steps and reruns only what failed. Starting over discards every step of this turn.", { count: progress.completed })}
               </span>
               <Button
@@ -195,7 +223,7 @@ export const MessageCard = memo(function MessageCard(props: {
               </Button>
               <Button
                 size="sm"
-                className="h-8 border-[var(--accent)] bg-[var(--accent)] text-xs text-[var(--accent-contrast)] hover:border-[var(--accent-hover)] hover:bg-[var(--accent-hover)]"
+                className="h-8 text-xs"
                 disabled={retryBusy}
                 onClick={() => onContinue?.(message.turnId as number)}
               >
@@ -219,10 +247,7 @@ export const MessageCard = memo(function MessageCard(props: {
           ) : null}
         </>
       ) : (
-        <>
-          <div className="text-[12px] font-semibold text-[var(--text-strong)]">{t("You")}</div>
-          <div className="user-message">{message.content}</div>
-        </>
+        <div className="user-message">{message.content}</div>
       )}
     </motion.article>
   );
@@ -241,7 +266,7 @@ export function TurnHeader({
 }) {
   let status: ReactNode = null;
   if (live || progress.state === "running") {
-    status = <span className="font-medium text-[var(--accent-text)]">{t("Working · {count} steps done", { count: progress.completed })}</span>;
+    status = <span className="text-[var(--text-soft)]">{t("Working · {count} steps done", { count: progress.completed })}</span>;
   } else if (progress.state === "waiting") {
     status = <span className="font-medium text-[var(--warning)]">{t("Waiting for plugin confirmation")}</span>;
   } else if (progress.state === "failed") {
@@ -254,16 +279,14 @@ export function TurnHeader({
     );
   }
   return (
-    <div className="flex items-center gap-2 text-[12px]">
-      <span className="agent-avatar" aria-hidden="true">
-        <Bot className="size-3" />
-      </span>
-      <span className="font-semibold text-[var(--text-strong)]">{agentName ?? t("Agent")}</span>
+    <div className="flex items-center gap-2 text-[13px]">
+      <DailyMark className="agent-mark size-[18px]" />
+      <span className="font-medium text-[var(--text-strong)]">{agentName ?? t("Agent")}</span>
       {live && progress.elapsedSec != null ? (
-        <span className="mono text-[var(--text-muted)]">{formatElapsed(progress.elapsedSec)}</span>
+        <span className="mono text-[12px] text-[var(--text-muted)]">{formatElapsed(progress.elapsedSec)}</span>
       ) : null}
       <span className="flex-1" />
-      {status}
+      <span className="text-[12px]">{status}</span>
     </div>
   );
 }
@@ -302,7 +325,7 @@ export function StepCard({ steps, live, progress }: { steps: TurnStep[]; live: b
       ) : null}
       {expanded ? steps.map((step) => <StepRow key={step.id} step={step} now={now} />) : null}
       {live && !steps.some((step) => step.status === "in_progress" || step.status === "waiting") ? (
-        <div className="step-row flex items-center gap-2.5 px-3 py-2 text-[var(--text-muted)]">
+        <div className="step-row flex items-center gap-2.5 px-3 py-[9px] text-[var(--text-muted)]">
           <CircleDashed className="size-3.5 shrink-0" aria-hidden="true" />
           {t("Preparing the next step…")}
         </div>

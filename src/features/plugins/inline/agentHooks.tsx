@@ -1,4 +1,5 @@
-import { GitBranchPlus, LoaderCircle } from "lucide-react";
+import { Check, CircleAlert, GitBranchPlus, LoaderCircle } from "lucide-react";
+import { t } from "@/i18n";
 import { isRecord, type PluginSpec } from "@/features/plugins/inline/types";
 
 export type HookAgentResult = {
@@ -46,17 +47,17 @@ function normalizeHookText(value: string) {
 }
 
 function hookPhaseLabel(phase: AgentHooksPayload["phase"]) {
-  return phase === "on_start" ? "On Start" : "On Finish";
+  return phase === "on_start" ? t("Before turn") : t("After turn");
 }
 
 function buildHookMeta(payload: AgentHooksPayload) {
-  const parts = [`${hookPhaseLabel(payload.phase)} Hook`];
+  const parts = [hookPhaseLabel(payload.phase)];
   if (payload.mode === "parallel") {
-    parts.push("Parallel");
+    parts.push(t("Parallel"));
   } else if (payload.appendPreviousOutput) {
-    parts.push("Serial With Context");
+    parts.push(t("Serial with context"));
   } else {
-    parts.push("Serial");
+    parts.push(t("Serial"));
   }
   return parts.join(" · ");
 }
@@ -101,16 +102,17 @@ function buildHookOutput(payload: AgentHooksPayload) {
 function AgentHooksCard({ payload }: { payload: AgentHooksPayload }) {
   const summary = buildHookMeta(payload);
   const output = buildHookOutput(payload);
+  const running = payload.agents.some(agent => agent.status === "running");
+  const failed = payload.agents.some(agent => agent.status === "failed");
 
   return (
     <div className="space-y-2 border-y border-[var(--line)] px-1 py-2">
-      <div className="text-xs text-[var(--text-muted)]">{summary}</div>
+      <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]" role="status">{running ? <LoaderCircle className="size-3.5 animate-spin text-[var(--accent)]" /> : failed ? <CircleAlert className="size-3.5 text-[var(--danger)]" /> : <Check className="size-3.5 text-[var(--success)]" />}{summary}<span className="ml-auto">{running ? t("Running") : failed ? t("Failed") : t("Completed")}</span></div>
       {output ? (
-        <div className="whitespace-pre-wrap break-words text-sm leading-6 text-[var(--text-strong)]">{output}</div>
+        <div className="whitespace-pre-wrap break-words font-serif text-base leading-[27px] text-[var(--text-strong)]">{output}</div>
       ) : (
         <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
-          <LoaderCircle className="size-4 animate-spin" />
-          Waiting for Hook Output…
+          {running ? t("Waiting for hook output…") : t("No hook output.")}
         </div>
       )}
     </div>
@@ -120,10 +122,10 @@ function AgentHooksCard({ payload }: { payload: AgentHooksPayload }) {
 function AgentHooksSkeleton() {
   return (
     <div className="space-y-2 border-y border-[var(--line)] px-1 py-2">
-      <div className="text-xs text-[var(--text-muted)]">Hook Lifecycle · Pending</div>
+      <div className="text-xs text-[var(--text-muted)]">{t("Hook output")}</div>
       <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
         <LoaderCircle className="size-4 animate-spin" />
-        Waiting for Hook Output…
+        {t("Waiting for hook output…")}
       </div>
     </div>
   );

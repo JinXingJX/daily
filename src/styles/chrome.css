@@ -1,4 +1,7 @@
-/* ---- Window chrome ---- */
+/* ---- Window chrome ----
+ * There is no separate title bar surface: the 44px strip continues the sidebar on the left and the
+ * canvas on the right, and nothing sits along the bottom edge.
+ */
 
 .app-drag {
   -webkit-app-region: drag;
@@ -25,8 +28,7 @@
 
 .window-titlebar {
   height: var(--titlebar-height);
-  border-bottom: 1px solid var(--line);
-  background: var(--chrome);
+  background: var(--app-main-bg);
 }
 
 .titlebar-lead {
@@ -34,8 +36,25 @@
   height: 100%;
   flex: none;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
+  gap: 8px;
   padding: 0 8px 0 var(--traffic-light-safe);
+}
+
+.titlebar-lead[data-panel="open"] {
+  border-right: 1px solid var(--line);
+  background: var(--app-sidebar-bg);
+}
+
+.titlebar-brand {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-strong);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 24px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .titlebar-main {
@@ -44,67 +63,72 @@
   min-width: 0;
   flex: 1;
   align-items: center;
-  gap: 12px;
-  border-left: 1px solid var(--line);
-  background: var(--app-main-bg);
-  padding: 0 12px 0 16px;
+  gap: 8px;
+  padding: 0 12px 0 20px;
 }
 
-.titlebar-icon {
+.titlebar-lead[data-panel="closed"] + .titlebar-main {
+  padding-left: 4px;
+}
+
+.titlebar-title {
+  min-width: 0;
+  flex: 1;
+  margin: 0;
+  overflow: hidden;
+  color: var(--text-strong);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.titlebar-icon,
+.titlebar-button {
   display: inline-flex;
-  width: 2rem;
   height: 2rem;
   flex: none;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   border: 0;
   border-radius: var(--radius-control);
   background: transparent;
   color: var(--text-soft);
+  font-size: 13px;
   transition:
     background-color var(--duration-fast) var(--ease-out),
     color var(--duration-fast) var(--ease-out),
     box-shadow var(--duration-fast) var(--ease-out);
 }
 
+.titlebar-icon {
+  width: 2rem;
+}
+
+.titlebar-button {
+  padding: 0 10px;
+}
+
 .titlebar-icon:hover,
-.titlebar-icon[aria-pressed="true"] {
-  background: var(--geist-gray-alpha-100);
+.titlebar-button:hover {
+  background: var(--fill-hover);
   color: var(--text-strong);
 }
 
-.titlebar-icon:focus-visible {
+.titlebar-icon[aria-pressed="true"] {
+  background: var(--fill-active);
+  color: var(--text-strong);
+}
+
+.titlebar-icon:focus-visible,
+.titlebar-button:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
 }
 
-.titlebar-command {
-  display: inline-flex;
-  height: 30px;
-  flex: none;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-control);
-  background: var(--surface);
-  padding: 0 8px 0 10px;
-  color: var(--text-soft);
-  font-size: 12px;
-  transition:
-    border-color var(--duration-fast) var(--ease-out),
-    background-color var(--duration-fast) var(--ease-out);
-}
-
-.titlebar-command:hover {
-  border-color: var(--line-strong);
-  background: var(--surface-muted);
-}
-
-.titlebar-command:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
-}
-
+/* Run state of the open task. Running stays neutral so it never reads as a warning. */
 .run-pill {
   display: inline-flex;
   height: 26px;
@@ -112,15 +136,16 @@
   align-items: center;
   gap: 8px;
   border-radius: var(--radius-full);
+  background: var(--surface-muted);
   padding: 0 10px;
+  color: var(--text-strong);
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
 }
 
-.run-pill[data-state="running"] {
-  background: var(--accent-soft);
-  color: var(--accent-text);
+.run-pill[data-state="running"] > svg {
+  color: var(--accent);
 }
 
 .run-pill[data-state="waiting"] {
@@ -137,30 +162,9 @@
   opacity: 0.55;
 }
 
-.status-bar {
-  display: flex;
-  height: var(--statusbar-height);
-  flex: none;
-  align-items: center;
-  gap: 16px;
-  border-top: 1px solid var(--line);
-  background: var(--chrome);
-  padding: 0 12px;
-  color: var(--text-soft);
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-.status-bar-item {
-  display: inline-flex;
-  min-width: 0;
-  align-items: center;
-  gap: 6px;
-}
-
 .status-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   flex: none;
   border-radius: var(--radius-full);
   background: var(--text-disabled);

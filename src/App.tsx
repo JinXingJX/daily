@@ -12,8 +12,6 @@ import {
 } from "react";
 import {
   APP_EVENT_NAME,
-  RAIL_WIDTH,
-  SETTINGS_NAV_WIDTH,
   SIDEBAR_DEFAULT_WIDTH,
   TITLEBAR_COLLAPSED_LEAD,
   clampSidebarWidth,
@@ -34,12 +32,13 @@ import {
   type WorkspaceInfo,
 } from "@/platform/desktop";
 import { coreRoute, routeIsCore, useAppStore, type AppRoute } from "./useAppStore";
-import type { AppEventEnvelope, AppSnapshot, ComposerImage, ContextRootOption } from "./types";
+import type { AppEventEnvelope, AppSnapshot, ComposerImage, ContextRootOption, ProviderKind } from "./types";
 import { ChatRoute } from "@/app/routes/ChatRoute";
 import { SettingsRoute } from "@/app/routes/SettingsRoute";
 import { WindowTitlebar } from "@/app/chrome/WindowTitlebar";
 import { BackendBanner } from "@/app/chrome/BackendBanner";
-import { StatusBar } from "@/app/chrome/StatusBar";
+import { TaskCenter } from "@/app/chrome/TaskCenter";
+import { runtimeHealth } from "@/app/chrome/runtimeHealth";
 import { CommandPalette } from "@/app/chrome/CommandPalette";
 import { BootstrapState } from "@/app/chrome/BootstrapState";
 import { sameRoute } from "@/app/routes/sameRoute";
@@ -400,28 +399,34 @@ function App() {
       : null;
   const activeCorePage = activeRoute.kind === "core" ? activeRoute.page : null;
   const chatOpen = activeCorePage === "chat";
-  const panelVisible = chatOpen && !sidebarCollapsed;
+  // The sidebar is one global state: expanded on every page, or collapsed to the rail.
+  const panelVisible = !sidebarCollapsed;
   const activeSessionNode =
     workspace.activeSessionId != null
       ? workspace.nodes.find((node) => node.sessionId === workspace.activeSessionId) ?? null
       : null;
-  const leadWidth = panelVisible
-    ? RAIL_WIDTH + sidebarWidth
-    : activeCorePage === "settings"
-      ? RAIL_WIDTH + SETTINGS_NAV_WIDTH
-      : TITLEBAR_COLLAPSED_LEAD;
+  const leadWidth = panelVisible ? sidebarWidth : TITLEBAR_COLLAPSED_LEAD;
   const shellStyle = {
     "--panel-width": `${panelVisible ? sidebarWidth : 0}px`,
   } as CSSProperties;
   const activeAgentName =
     agentApps.find((agent) => agent.id === (activeLatestTurn?.agentAppId ?? activeSessionAgentId))?.name ?? null;
-  const modelSettings = settings.effective.model;
-  const defaultAuthConfig =
-    modelSettings.authConfigs.find((config) => config.id === modelSettings.authConfigId) ?? modelSettings.authConfigs[0];
-  const knownAuthStatus =
-    defaultAuthConfig?.providerKind === "antigravity_login" ? antigravityAuthStatus : defaultAuthConfig?.providerKind === "codex_login" ? codexAuthStatus : null;
+  // Sign-in providers known to be signed out; the composer flags a model that depends on one.
+  const signedOutProviders: ProviderKind[] = [];
+  if (codexAuthStatus && !codexAuthStatus.authenticated) signedOutProviders.push("codex_login");
+  if (antigravityAuthStatus && !antigravityAuthStatus.authenticated) signedOutProviders.push("antigravity_login");
   const showRunTurn =
     chatOpen && activeLatestTurn && activeLatestTurn.status !== "completed" ? activeLatestTurn : null;
+  const navigation = {
+    activeRoute,
+    pluginViews: pluginMainViews,
+    onRouteChange: navigateToRoute,
+    onManagePlugins: () => {
+      if (navigateToRoute(coreRoute("settings"))) setSettingsEntry("plugins");
+    },
+    onCreateSession: () => runUiAction(handleCreateSession(currentParentId)),
+    onCommandOpen: () => setCommandPaletteOpen(true),
+  };
 
   return (
     <div
@@ -431,16 +436,14 @@ function App() {
       <WindowTitlebar
         leadWidth={leadWidth}
         panelVisible={panelVisible}
-        panelToggleAvailable={chatOpen}
-        contextLabel={chatOpen ? workspaceInfo?.name ?? null : null}
         activeLabel={
           activePluginView?.view.title ??
           (chatOpen ? displaySessionTitle(activeSessionNode?.name) : t("Settings"))
         }
         runTurn={showRunTurn}
+        actions={<TaskCenter ready={backendStatus.state === "ready"} />}
         inspectorAvailable={chatOpen}
         inspectorOpen={inspectorOpen}
-        onCommandOpen={() => setCommandPaletteOpen(true)}
         onToggleInspector={() => setInspectorOpen((value) => !value)}
         onTogglePanel={() => setSidebarCollapsed((value) => !value)}
       />
@@ -451,13 +454,13 @@ function App() {
         />
       ) : null}
       {error ? (
-        <div className="border-b border-[var(--danger-line)] bg-[var(--danger-soft)] px-4 py-2" role="alert">
+        <div className="border-y border-[var(--danger-line)] bg-[var(--danger-soft)] px-4 py-2" role="alert">
           <div className="flex items-start gap-3 text-[13px] text-[var(--text-strong)]">
             <AlertTriangle className="mt-0.5 size-4 shrink-0 text-[var(--danger)]" />
             <span className="min-w-0 flex-1 break-words">{error}</span>
             <button
               type="button"
-              className="rounded-[var(--radius-control)] p-1 text-[var(--text-muted)] hover:bg-[var(--geist-gray-alpha-100)] hover:text-[var(--text-strong)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
+              className="rounded-[var(--radius-control)] p-1 text-[var(--text-muted)] hover:bg-[var(--fill-hover)] hover:text-[var(--text-strong)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
               aria-label={t("Dismiss error")}
               onClick={() => setError(null)}
             >
@@ -473,18 +476,10 @@ function App() {
           sidebarResizing && "cursor-col-resize select-none",
         )}
       >
-        <AppRail
-          activeRoute={activeRoute}
-          pluginViews={pluginMainViews}
-          runtimeIsRunning={runtime?.isRunning ?? false}
-          onRouteChange={navigateToRoute}
-          onManagePlugins={() => {
-            if (navigateToRoute(coreRoute("settings"))) setSettingsEntry("plugins");
-          }}
-        />
         {panelVisible ? (
-          <div className="hidden min-h-0 shrink-0 md:flex" style={{ width: "var(--panel-width)" }}>
+          <div className="flex min-h-0 shrink-0" style={{ width: "var(--panel-width)" }}>
             <Sidebar
+              {...navigation}
               resizing={sidebarResizing}
               width={sidebarWidth}
               workspaceName={workspaceInfo?.name ?? t("Workspace")}
@@ -494,16 +489,18 @@ function App() {
               activeAgentName={activeAgentName}
               activeLatestTurn={activeLatestTurn}
               runtime={runtime}
-              onCommandOpen={() => setCommandPaletteOpen(true)}
-              onRouteChange={navigateToRoute}
+              health={runtimeHealth(backendStatus, runtime?.isRunning ?? false)}
+              theme={theme}
+              onThemeChange={setTheme}
               onResizeStart={handleSidebarResizeStart}
               onResizeBy={(delta) => setSidebarWidth((value) => clampSidebarWidth(value + delta))}
-              onCreateSession={(parentId) => runUiAction(handleCreateSession(parentId ?? workspace.rootId))}
               onOpenSession={(sessionId) => runUiAction(handleOpenSession(sessionId))}
               onOpenWorkspace={() => runUiAction(workspaceDesktop.open())}
             />
           </div>
-        ) : null}
+        ) : (
+          <AppRail {...navigation} runtimeIsRunning={runtime?.isRunning ?? false} />
+        )}
 
         <main className="app-main flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <div className="flex min-h-0 flex-1 overflow-hidden">
@@ -529,6 +526,7 @@ function App() {
                 }}
                 inspectorOpen={inspectorOpen}
                 onCloseInspector={() => setInspectorOpen(false)}
+                signedOutProviders={signedOutProviders}
               />
             ) : activePluginView ? null : (
               <SettingsRoute
@@ -604,14 +602,6 @@ function App() {
           </div>
         </main>
       </div>
-      <StatusBar
-        backendStatus={backendStatus}
-        runtimeStatus={runtime?.isRunning ? runtime.status : null}
-        runtimeIsRunning={runtime?.isRunning ?? false}
-        authLabel={defaultAuthConfig ? `${defaultAuthConfig.name} · ${modelSettings.model}` : t("No model configured")}
-        authTone={knownAuthStatus ? (knownAuthStatus.authenticated ? "success" : "warning") : "neutral"}
-        enabledPluginCount={plugins.installed.filter((plugin) => plugin.enabled).length}
-      />
       <CommandPalette
         open={commandPaletteOpen}
         items={commandItems}

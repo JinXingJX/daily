@@ -37,7 +37,9 @@
     "test:task-runtime": "node scripts/test-task-runtime.mjs",
     "test:electron": "npm run backend:build && vitest run electron",
     "test": "npm run test:rust && npm run check:protocol && npm run test:renderer && npm run test:electron && npm run build",
-    "package:win": "npm run backend:release && npm run build && electron-builder --win nsis --x64 --publish never"
+    "package:win": "npm run backend:release && npm run build && electron-builder --win nsis --x64 --publish never",
+    "gen:plugin-design": "node scripts/sync-plugin-design.mjs",
+    "check:plugin-design": "node scripts/sync-plugin-design.mjs --check"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.3",

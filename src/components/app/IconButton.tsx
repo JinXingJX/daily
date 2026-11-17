@@ -13,7 +13,7 @@ export function IconButton({ label, disabled, onClick, children, className }: Ic
   return (
     <button
       className={cn(
-        "inline-flex size-8 items-center justify-center rounded-[var(--radius-control)] border border-transparent bg-transparent text-[var(--text-muted)] transition-[background-color,border-color,box-shadow,color] duration-150 ease-out hover:border-[var(--line)] hover:bg-[var(--geist-gray-alpha-100)] hover:text-[var(--text-strong)] disabled:cursor-not-allowed disabled:bg-transparent disabled:text-[var(--text-disabled)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]",
+        "inline-flex size-8 items-center justify-center rounded-[var(--radius-control)] border border-transparent bg-transparent text-[var(--text-muted)] transition-[background-color,border-color,box-shadow,color] duration-150 ease-out hover:border-[var(--line)] hover:bg-[var(--fill-hover)] hover:text-[var(--text-strong)] disabled:cursor-not-allowed disabled:bg-transparent disabled:text-[var(--text-disabled)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]",
         className,
       )}
       type="button"

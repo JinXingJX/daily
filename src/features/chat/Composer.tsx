@@ -6,9 +6,10 @@ import { cn } from "@/lib/utils";
 import type { AgentAppConfig, ComposerImage } from "@/types";
 import {
   ArrowUp,
-  Bot,
+  CircleAlert,
   LoaderCircle,
   Paperclip,
+  Plus,
   Square,
   X
 } from "lucide-react";
@@ -22,6 +23,7 @@ export function Composer({
   activeSessionTitle,
   activeSessionAgentAppId,
   modelLabel,
+  modelSignedOut,
   runtimeIsRunning,
   agents,
   canSend,
@@ -45,6 +47,7 @@ export function Composer({
   activeSessionTitle: string | null;
   activeSessionAgentAppId: number | null;
   modelLabel: string | null;
+  modelSignedOut: boolean;
   runtimeIsRunning: boolean;
   agents: AgentAppConfig[];
   canSend: boolean;
@@ -76,7 +79,7 @@ export function Composer({
     <div>
       <div className={cn("composer-card", focused && "composer-card-focused")}>
         {draft.startsWith("/") ? (
-          <div className="flex flex-wrap gap-1.5 border-b border-[var(--line)] px-2.5 py-2">
+          <div className="flex flex-wrap gap-1.5 border-b border-[var(--line-soft)] px-3 py-2.5">
             {SLASH_COMMANDS.map((command) => (
               <button
                 key={command.id}
@@ -113,8 +116,8 @@ export function Composer({
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           className={cn(
-            "resize-none rounded-none border-0 bg-transparent px-4 pb-1.5 pt-3.5 leading-6 shadow-none hover:border-0 focus-visible:shadow-none",
-            large ? "min-h-[6.5rem] text-[15px]" : "min-h-[4rem] text-[14px]",
+            "resize-none rounded-none border-0 bg-transparent px-[18px] pb-1 leading-6 shadow-none hover:border-0 focus-visible:shadow-none",
+            large ? "min-h-[6rem] pt-4 text-[16px]" : "min-h-[3.75rem] pt-3.5 text-[15px]",
           )}
           placeholder={placeholder}
         />
@@ -139,31 +142,30 @@ export function Composer({
           </div>
         ) : null}
 
-        <div className="flex flex-wrap items-center gap-1.5 px-2.5 pb-2.5 pt-1">
-          <Button size="icon" variant="ghost" className="size-8 text-[var(--text-soft)]" asChild aria-label={t("Attach images")} title={t("Attach images")}>
-            <label>
-              <input
-                className="hidden"
-                type="file"
-                accept="image/gif,image/jpeg,image/png,image/webp"
-                multiple
-                onChange={(event) => {
-                  const files = Array.from(event.currentTarget.files ?? []);
-                  event.currentTarget.value = "";
-                  onFiles(files);
-                }}
-              />
-              <Paperclip className="size-4" />
-            </label>
-          </Button>
-          <div className="segmented" role="radiogroup" aria-label={t("Working mode")}>
+        <div className="flex flex-wrap items-center gap-1.5 px-2.5 pb-2.5 pt-1.5">
+          <label className="chip-button chip-button-icon" title={t("Attach images")}>
+            <input
+              className="sr-only"
+              type="file"
+              aria-label={t("Attach images")}
+              accept="image/gif,image/jpeg,image/png,image/webp"
+              multiple
+              onChange={(event) => {
+                const files = Array.from(event.currentTarget.files ?? []);
+                event.currentTarget.value = "";
+                onFiles(files);
+              }}
+            />
+            <Plus className="size-4" />
+          </label>
+          <div className="mode-group" role="radiogroup" aria-label={t("Working mode")}>
             {COMPOSER_MODES.map((item) => (
               <button
                 key={item.id}
                 type="button"
                 role="radio"
                 aria-checked={mode === item.id}
-                className="segmented-item"
+                className="chip-button"
                 title={`${item.prompt}${mode === item.id ? ` ${t("(click again to clear)")}` : ""}`}
                 onClick={() => onModeChange(mode === item.id ? null : item.id)}
               >
@@ -182,10 +184,9 @@ export function Composer({
               className="composer-agent h-8 min-h-8 w-auto shadow-none focus:shadow-[var(--focus-ring)]"
               title={modelLabel ?? undefined}
             >
-              <Bot className="size-[13px] shrink-0" />
               <SelectValue placeholder={t("Choose agent")} />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent align="end">
               <SelectItem value="__none__">{t("No agent bound")}</SelectItem>
               {agents.map((agent) => (
                 <SelectItem key={agent.id} value={String(agent.id)}>
@@ -195,14 +196,19 @@ export function Composer({
             </SelectContent>
           </Select>
           {canStop ? (
-            <Button size="sm" className="h-8 gap-1.5 px-3 text-xs" title={t("Stop; you can continue from the checkpoint later")} onClick={onStop}>
-              <Square className="size-3 fill-current" />
+            <Button
+              size="sm"
+              className="h-8 gap-1.5 rounded-[var(--radius-chip)] px-3 text-[13px]"
+              title={t("Stop; you can continue from the checkpoint later")}
+              onClick={onStop}
+            >
+              <Square className="!size-2.5 fill-current" />
               {t("Stop")}
             </Button>
           ) : (
-            <Button
-              size="icon"
-              className="size-8"
+            <button
+              type="button"
+              className="composer-send"
               disabled={!canSend || turnCommandPending}
               aria-label={activeSessionId == null ? t("Start task") : t("Send")}
               title={`${t("Send")} (⌘⏎)`}
@@ -211,22 +217,28 @@ export function Composer({
               {turnCommandPending ? (
                 <LoaderCircle className="size-4 animate-spin motion-reduce:animate-none" />
               ) : (
-                <ArrowUp className="size-4" />
+                <ArrowUp className="size-4" strokeWidth={2.25} />
               )}
-            </Button>
+            </button>
           )}
         </div>
       </div>
-      <div className="mt-2 hidden justify-center gap-3.5 text-[11px] text-[var(--text-muted)] sm:flex">
-        {canStop ? <span>{t("After stopping you can continue from the checkpoint")}</span> : null}
-        {activeMode ? <span>{t("Adds the “{mode}” instructions", { mode: activeMode.label })}</span> : null}
-        <span>
-          <kbd>⌘⏎</kbd> {t("Send")}
+      <div className="composer-foot">
+        <span className={cn("inline-flex min-w-0 items-center gap-1.5", modelSignedOut && "text-[var(--warning)]")}>
+          {modelSignedOut ? <CircleAlert className="size-3 shrink-0" role="img" aria-label={t("Not ready")} /> : null}
+          <span className="truncate">{modelLabel ?? t("No model configured")}</span>
+          {activeMode ? <span className="truncate">· {t("Adds the “{mode}” instructions", { mode: activeMode.label })}</span> : null}
         </span>
-        <span>
-          <kbd>/</kbd> {t("Commands")}
+        <span className="hidden gap-3 sm:inline-flex">
+          {canStop ? <span>{t("After stopping you can continue from the checkpoint")}</span> : null}
+          <span>
+            <kbd>⌘⏎</kbd> {t("Send")}
+          </span>
+          <span>
+            <kbd>/</kbd> {t("Commands")}
+          </span>
+          <span>{t("Drop images to attach")}</span>
         </span>
-        <span>{t("Drop images to attach")}</span>
       </div>
     </div>
   );

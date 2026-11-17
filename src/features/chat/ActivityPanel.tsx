@@ -48,7 +48,7 @@ export function ActivityPanel({
 
   return (
     <aside className="activity-panel" aria-label={t("Inspector")}>
-      <div className="tab-list items-center px-2.5 pt-1.5">
+      <div className="tab-list items-center px-3 py-1.5">
         <div role="tablist" aria-label={t("Inspector views")} className="flex flex-1 gap-0.5">
           {tabs.map((item) => (
             <button
@@ -65,7 +65,7 @@ export function ActivityPanel({
             </button>
           ))}
         </div>
-        <button className="titlebar-icon mb-1" type="button" aria-label={t("Close inspector")} title={`${t("Close inspector")} (⌘I)`} onClick={onClose}>
+        <button className="titlebar-icon" type="button" aria-label={t("Close inspector")} title={`${t("Close inspector")} (⌘I)`} onClick={onClose}>
           <X className="size-4" />
         </button>
       </div>
@@ -74,12 +74,12 @@ export function ActivityPanel({
         role="tabpanel"
         id={`inspector-panel-${tab}`}
         aria-labelledby={`inspector-tab-${tab}`}
-        className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-4"
+        className="flex min-h-0 flex-1 flex-col gap-[22px] overflow-y-auto px-4 pb-4 pt-2.5"
       >
         {tab === "run" ? (
           latestTurn ? (
             <>
-              <div className="stat-grid grid-cols-2">
+              <div className="stat-list grid-cols-2">
                 <div>
                   <div className="stat-label">{t("Status")}</div>
                   <div className={cn("stat-value", runStateTone(progress.state))}>{runStateLabel(progress.state)}</div>
@@ -131,7 +131,7 @@ export function ActivityPanel({
                             className={cn(
                               "truncate",
                               step.status === "in_progress" || step.status === "waiting"
-                                ? "font-medium text-[var(--accent-text)]"
+                                ? "font-medium text-[var(--text-strong)]"
                                 : step.status === "failed"
                                   ? "font-medium text-[var(--danger)]"
                                   : "text-[var(--text-strong)]",
@@ -140,7 +140,7 @@ export function ActivityPanel({
                           >
                             {step.toolName ? `${stepKindLabel(step)} · ${step.toolName}` : stepKindLabel(step)}
                           </span>
-                          <span className="text-[11px] text-[var(--text-muted)]">
+                          <span className="text-[12px] leading-4 text-[var(--text-muted)]">
                             {formatStepDuration(stepDurationSec(step, now))}
                           </span>
                         </span>
@@ -154,7 +154,7 @@ export function ActivityPanel({
 
               <section className="flex flex-col gap-2">
                 <h3 className="panel-label">{t("Instruction")}</h3>
-                <p className="line-clamp-3 m-0 whitespace-pre-wrap break-words rounded-[var(--radius-panel)] bg-[var(--surface-muted)] px-3 py-2.5 text-[12px] leading-5 text-[var(--text-soft)]">
+                <p className="line-clamp-3 m-0 whitespace-pre-wrap break-words rounded-[var(--radius-panel)] bg-[var(--surface-muted)] px-3 py-2.5 text-[13px] leading-5 text-[var(--text-soft)]">
                   {latestTurn.prompt}
                 </p>
               </section>
@@ -270,7 +270,7 @@ export function EmptyPanel({ title, detail }: { title: string; detail: string })
   return (
     <div className="px-2 py-10 text-center">
       <Plug className="mx-auto size-5 text-[var(--text-muted)]" aria-hidden="true" />
-      <h3 className="mt-3 text-[13px] font-medium text-[var(--text-strong)]">{title}</h3>
+      <h3 className="mb-0 mt-3 text-[14px] font-medium text-[var(--text-strong)]">{title}</h3>
       <p className="mt-1 text-[12px] leading-5 text-[var(--text-muted)]">{detail}</p>
     </div>
   );

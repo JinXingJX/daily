@@ -15,15 +15,8 @@ import type {
   SettingsView,
   WorkspaceView
 } from "@/types";
-import {
-  Bot,
-  FolderCog,
-  KeyRound,
-  Plug,
-  Search,
-  Settings2
-} from "lucide-react";
-import { useEffect, useMemo, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
+import { Search } from "lucide-react";
+import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { AgentSettings } from "./AgentSettings";
 import { AuthSettings, type ApiProviderProps } from "./AuthSettings";
 import { ConfigFileSettings } from "./ConfigFileSettings";
@@ -103,13 +96,12 @@ const SETTINGS_SECTIONS: Array<{
   label: string;
   detail: string;
   group: SectionGroup;
-  icon: ReactNode;
 }> = [
-  { id: "general", get label() { return t("General"); }, detail: "theme runtime language general 外观 运行时 语言", group: "workspace", icon: <Settings2 className="size-[15px]" /> },
-  { id: "auth", get label() { return t("Model providers"); }, detail: "OpenAI Anthropic Gemini Codex Antigravity api key auth login 登录", group: "workspace", icon: <KeyRound className="size-[15px]" /> },
-  { id: "agents", get label() { return t("Agents"); }, detail: "agents model hooks context 模型 钩子 上下文", group: "build", icon: <Bot className="size-[15px]" /> },
-  { id: "plugins", get label() { return t("Plugins"); }, detail: "plugins extensions 扩展", group: "build", icon: <Plug className="size-[15px]" /> },
-  { id: "files", get label() { return t("Settings files"); }, detail: "user project local config files 用户 项目 本地", group: "advanced", icon: <FolderCog className="size-[15px]" /> },
+  { id: "general", get label() { return t("General"); }, detail: "theme runtime language general 外观 运行时 语言", group: "workspace" },
+  { id: "auth", get label() { return t("Model providers"); }, detail: "OpenAI Anthropic Gemini Codex Antigravity api key auth login 登录", group: "workspace" },
+  { id: "agents", get label() { return t("Agents"); }, detail: "agents model hooks context 模型 钩子 上下文", group: "build" },
+  { id: "plugins", get label() { return t("Plugins"); }, detail: "plugins extensions 扩展", group: "build" },
+  { id: "files", get label() { return t("Settings files"); }, detail: "user project local config files 用户 项目 本地", group: "advanced" },
 ];
 
 const SECTION_GROUPS: SectionGroup[] = ["workspace", "build", "advanced"];
@@ -137,14 +129,15 @@ export function SettingsPage(props: SettingsPageProps) {
   const agentEditor = activeSection === "agents";
 
   return (
-    <div className="settings-page grid min-h-0 flex-1 overflow-hidden md:grid-cols-[18rem_minmax(0,1fr)]">
-      <aside className="settings-sidebar flex min-h-0 flex-col gap-4 border-b border-[var(--line)] p-3 md:border-b-0 md:border-r">
+    <div className="settings-page grid min-h-0 flex-1 overflow-hidden md:grid-cols-[15rem_minmax(0,1fr)]">
+      <aside className="flex min-h-0 flex-col gap-4 border-b border-[var(--line-soft)] px-3 pb-3 pt-5 md:border-b-0 md:pl-5 md:pr-2">
+        <h2 className="display-title px-2.5">{t("Settings")}</h2>
         <label className="relative block">
           <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-[var(--text-muted)]" />
           <Input
             type="search"
             value={query}
-            className="h-8 border-[var(--line)] bg-[var(--surface-strong)] pl-8 text-[13px]"
+            className="h-[34px] border-[var(--line)] bg-[var(--surface-strong)] pl-8 text-[13px]"
             placeholder={t("Search settings")}
             aria-label={t("Search settings")}
             onChange={(event) => setQuery(event.currentTarget.value)}
@@ -167,7 +160,6 @@ export function SettingsPage(props: SettingsPageProps) {
                       aria-current={activeSection === section.id ? "page" : undefined}
                       onClick={() => setActiveSection(section.id)}
                     >
-                      <span className="text-[var(--text-soft)]">{section.icon}</span>
                       <span className="min-w-0 flex-1 truncate text-left">{section.label}</span>
                       {count != null ? (
                         <span className="mono text-[11px] font-normal text-[var(--text-muted)]">{count}</span>
@@ -184,7 +176,7 @@ export function SettingsPage(props: SettingsPageProps) {
         </nav>
       </aside>
 
-      <main className={cn("min-h-0", agentEditor ? "flex overflow-hidden" : "overflow-auto px-6 py-8 lg:px-10")}>
+      <main className={cn("min-h-0", agentEditor ? "flex overflow-hidden" : "overflow-auto px-6 pb-12 pt-7 lg:px-8")}>
         {agentEditor ? (
           <AgentSettings
             agentApps={props.agentApps}
@@ -200,7 +192,7 @@ export function SettingsPage(props: SettingsPageProps) {
             onLoadContextRoots={props.onLoadContextRoots}
           />
         ) : (
-          <div className="w-full max-w-[52rem]">
+          <div className="w-full max-w-[46rem]">
             {activeSection === "general" ? (
               <GeneralSettings
                 workspace={props.workspace}

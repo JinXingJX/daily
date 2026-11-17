@@ -28,7 +28,7 @@ function props(): ComponentProps<typeof ChatSurface> {
   const noOp = () => {};
   return {
     activeSessionId: 3, activeSessionTitle: "插件权限审查", activeSessionAgentAppId: 1, boundAgent: null,
-    modelLabel: "Codex · gpt-5.5", runtimeIsRunning: false, modelReady: true,
+    modelLabel: "Codex · gpt-5.5", runtimeIsRunning: false, modelReady: true, modelSignedOut: false,
     readiness: { modelLabel: "Codex · gpt-5.5", modelReady: true, agentCount: 1, pluginNames: [] },
     agents: [], turnsById: new Map([[7, failedTurn]]), latestTurn: failedTurn, runningMessage: null,
     messages: [

@@ -34,11 +34,8 @@ export const SLASH_COMMANDS = [
   },
 ] as const;
 
-export const RAIL_WIDTH = 56;
-/** Room for the macOS traffic lights plus the panel toggle when the task panel is hidden. */
-export const TITLEBAR_COLLAPSED_LEAD = 126;
-/** Matches the settings navigation column (`md:grid-cols-[18rem_…]` in SettingsPage). */
-export const SETTINGS_NAV_WIDTH = 288;
+/** Titlebar segment left of the title when the sidebar is collapsed: macOS traffic lights plus the toggle. */
+export const TITLEBAR_COLLAPSED_LEAD = 118;
 export const SIDEBAR_DEFAULT_WIDTH = 264;
 export const SIDEBAR_MIN_WIDTH = 220;
 export const SIDEBAR_MAX_WIDTH = 400;

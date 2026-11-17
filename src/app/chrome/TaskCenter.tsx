@@ -52,8 +52,9 @@ export function TaskCenter({ ready }: { ready: boolean }) {
     finally { setPending(null); }
   };
   return <Dialog open={open} onOpenChange={setOpen}>
-    <DialogTrigger asChild><button type="button" className="status-bar-item rounded px-1 hover:bg-[var(--surface-inset)]" aria-label={t("Task center")}>
-      {active ? <LoaderCircle className="size-3 animate-spin" /> : <ListTodo className="size-3" />}{t("Tasks")}{active ? ` · ${active}` : ""}
+    <DialogTrigger asChild><button type="button" className="titlebar-button" aria-label={t("Task center")} title={t("Task center")}>
+      {active ? <LoaderCircle className="size-4 animate-spin text-[var(--accent)] motion-reduce:animate-none" /> : <ListTodo className="size-4" />}
+      <span className="hidden lg:inline">{t("Background tasks")}</span>{active ? <span className="mono text-[12px]">{active}</span> : null}
     </button></DialogTrigger>
     <DialogContent className="max-h-[76vh] overflow-y-auto">
       <DialogHeader><DialogTitle>{t("Task center")}</DialogTitle><DialogDescription>{t("Tasks continue when you switch pages. Results and checkpoints are saved.")}</DialogDescription></DialogHeader>
@@ -67,7 +68,7 @@ export function TaskCenter({ ready }: { ready: boolean }) {
           {["queued", "running", "waiting_input"].includes(task.status) ? <Button size="sm" variant="outline" disabled={pending === task.id} onClick={() => void act(task, "cancel")}>{t("Stop")}</Button> : null}
         </div>
       </div>)}</div>
-      {detail ? <div className="mt-5 rounded border border-[var(--line)] bg-[var(--surface-inset)] p-4"><p className="mb-3 text-sm font-medium">{detail.title || t("Result")}</p><pre className="max-h-64 overflow-auto whitespace-pre-wrap break-words text-xs leading-6">{resultText(detail.result)}</pre></div> : null}
+      {detail ? <div className="mt-5 rounded-[var(--radius-panel)] border border-[var(--line)] bg-[var(--surface)] p-4"><p className="mb-3 text-sm font-medium">{detail.title || t("Result")}</p><pre className="max-h-64 overflow-auto whitespace-pre-wrap break-words text-xs leading-6">{resultText(detail.result)}</pre></div> : null}
     </DialogContent>
   </Dialog>;
 }

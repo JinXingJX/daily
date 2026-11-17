@@ -11,45 +11,56 @@ export function BootstrapState({
   onRetry: () => void;
 }) {
   return (
-    <div className="min-h-[100dvh] bg-[var(--app-shell-bg)]">
-      <div className="app-drag h-12 border-b border-[var(--line)] bg-[var(--chrome)]" />
+    <div className="flex min-h-[100dvh] bg-[var(--app-shell-bg)]">
       {error ? (
-        <section className="mx-auto mt-28 w-full max-w-xl border-y border-[var(--line)] bg-transparent py-6" role="alert">
-          <h1 className="text-lg font-semibold text-[var(--text-strong)]">{t("Workspace failed to start")}</h1>
-          <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
-            {t("The workspace could not load its initial state.")}
-          </p>
-          <div className="mt-4 border-y border-[var(--line)] bg-[var(--surface)] px-1 py-4 font-mono text-sm leading-6 text-[var(--text)]">
-            {error}
-          </div>
-          <div className="mt-4 text-sm text-[var(--text-muted)]">
-            {backendStatus.canRetry ? (
-              <button className="rounded-[var(--radius-control)] border border-[var(--line-strong)] px-3 py-2 font-semibold text-[var(--text-strong)] hover:bg-[var(--surface-muted)]" type="button" onClick={onRetry}>
-                {t("Restart local runtime")}
-              </button>
-            ) : t("The local runtime is still starting; Daily reconnects automatically.")}
-          </div>
-        </section>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div className="app-drag h-[var(--titlebar-height)] shrink-0" />
+          <section className="mx-auto mt-24 w-full max-w-xl px-6" role="alert">
+            <h1 className="display-title">{t("Workspace failed to start")}</h1>
+            <p className="mb-0 mt-2 text-[14px] leading-[22px] text-[var(--text-soft)]">
+              {t("The workspace could not load its initial state.")}
+            </p>
+            <div className="mono mt-5 rounded-[var(--radius-panel)] border border-[var(--line)] bg-[var(--surface)] px-4 py-3 text-[13px] leading-[21px] text-[var(--text)]">
+              {error}
+            </div>
+            <div className="mt-5 text-[14px] text-[var(--text-muted)]">
+              {backendStatus.canRetry ? (
+                <button
+                  className="focus-ring h-9 rounded-[var(--radius-control)] border border-[var(--primary)] bg-[var(--primary)] px-3.5 font-medium text-[var(--primary-contrast)] hover:bg-[var(--primary-hover)]"
+                  type="button"
+                  onClick={onRetry}
+                >
+                  {t("Restart local runtime")}
+                </button>
+              ) : t("The local runtime is still starting; Daily reconnects automatically.")}
+            </div>
+          </section>
+        </div>
       ) : (
-        <div className="grid h-[calc(100dvh-3rem)] grid-cols-[288px_minmax(0,1fr)]">
-          <aside className="border-r border-[var(--line)] bg-[var(--app-sidebar-bg)] p-4">
-            <div className="skeleton h-9 w-32 rounded-[var(--radius-control)]" />
-            <div className="skeleton mt-5 h-8 w-full rounded-[var(--radius-control)]" />
-            <div className="mt-6 space-y-2">
-              <div className="skeleton h-7 w-[82%] rounded-[var(--radius-control)]" />
-              <div className="skeleton h-7 w-[64%] rounded-[var(--radius-control)]" />
-              <div className="skeleton h-7 w-[74%] rounded-[var(--radius-control)]" />
+        <>
+          <aside className="flex w-[264px] shrink-0 flex-col border-r border-[var(--line)] bg-[var(--app-sidebar-bg)]">
+            <div className="app-drag h-[var(--titlebar-height)] shrink-0" />
+            <div className="flex flex-col gap-2 px-4 pt-2">
+              <div className="skeleton h-6 w-28 rounded-[var(--radius-control)]" />
+              <div className="skeleton h-6 w-40 rounded-[var(--radius-control)]" />
+              <div className="skeleton mt-6 h-5 w-[82%] rounded-[var(--radius-control)]" />
+              <div className="skeleton h-5 w-[64%] rounded-[var(--radius-control)]" />
+              <div className="skeleton h-5 w-[74%] rounded-[var(--radius-control)]" />
             </div>
           </aside>
-          <main className="p-5">
-            <div className="skeleton h-10 w-full rounded-[var(--radius-control)]" />
-            <div className="mx-auto mt-24 max-w-3xl space-y-4">
-              <div className="skeleton h-4 w-40 rounded-full" />
-              <div className="skeleton h-20 w-full rounded-[var(--radius-panel)]" />
-              <div className="skeleton ml-auto h-16 w-3/4 rounded-[var(--radius-panel)]" />
+          <main className="flex min-w-0 flex-1 flex-col">
+            <div className="app-drag h-[var(--titlebar-height)] shrink-0" />
+            <div className="mx-auto flex w-full max-w-[42rem] flex-1 flex-col justify-center gap-6 px-6 pb-24">
+              <div className="skeleton mx-auto h-9 w-72 rounded-[var(--radius-control)]" />
+              <div className="skeleton h-36 w-full rounded-[var(--radius-composer)]" />
+              <div className="flex justify-center gap-2">
+                <div className="skeleton h-[34px] w-24 rounded-[var(--radius-chip)]" />
+                <div className="skeleton h-[34px] w-24 rounded-[var(--radius-chip)]" />
+                <div className="skeleton h-[34px] w-24 rounded-[var(--radius-chip)]" />
+              </div>
             </div>
           </main>
-        </div>
+        </>
       )}
     </div>
   );

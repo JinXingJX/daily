@@ -1,5 +1,6 @@
 import {
   ChartCandlestick,
+  Clapperboard,
   ChevronsUpDown,
   CircleAlert,
   CirclePause,
@@ -17,10 +18,10 @@ import {
   useEffect,
   useRef,
   useState,
-  type CSSProperties,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
+import type { StatusTone } from "@/app/chrome/runtimeHealth";
 import { turnProgress, sessionRunState, type RunState } from "@/features/chat/turnProgress";
 import { cn } from "@/lib/utils";
 import { coreRoute, pluginViewRoute, routeIsCore, type AppRoute } from "@/useAppStore";
@@ -33,53 +34,61 @@ export type PluginMainView = {
   view: PluginViewContribution;
 };
 
-type AppRailProps = {
+type NavigationProps = {
   activeRoute: AppRoute;
   pluginViews: PluginMainView[];
-  runtimeIsRunning: boolean;
   onRouteChange: (route: AppRoute) => void;
   onManagePlugins: () => void;
+  onCreateSession: () => void;
+  onCommandOpen: () => void;
 };
 
-export function AppRail(props: AppRailProps) {
+function pluginViewActive(route: AppRoute, item: PluginMainView) {
+  return route.kind === "pluginView" && route.pluginId === item.plugin.identifier && route.viewId === item.view.id;
+}
+
+/** The collapsed sidebar: the same destinations as icon buttons. */
+export function AppRail(props: NavigationProps & { runtimeIsRunning: boolean }) {
   const chatActive = routeIsCore(props.activeRoute, "chat");
   const settingsActive = routeIsCore(props.activeRoute, "settings");
 
   return (
     <nav className="app-rail" aria-label={t("App")}>
+      <RailButton label={`${t("New task")} (⌘N)`} onClick={props.onCreateSession}>
+        <span className="new-task-mark">
+          <Plus className="size-3.5" strokeWidth={2.25} />
+        </span>
+      </RailButton>
+      <RailButton label={`${t("Search tasks and commands")} (⌘K)`} onClick={props.onCommandOpen}>
+        <Search className="size-[17px]" />
+      </RailButton>
+      <div className="app-rail-divider" aria-hidden="true" />
       <RailButton
         label={props.runtimeIsRunning ? t("Chat (tasks running)") : t("Chat")}
         active={chatActive}
         onClick={() => props.onRouteChange(coreRoute("chat"))}
       >
-        <MessageSquare className="size-[18px]" />
+        <MessageSquare className="size-[17px]" />
         {props.runtimeIsRunning ? <span className="app-rail-badge" aria-hidden="true" /> : null}
       </RailButton>
-      {props.pluginViews.map(({ plugin, view }) => {
-        const tone = pluginViewTone(view);
-        const Icon = pluginViewIcon(view);
-        const active =
-          props.activeRoute.kind === "pluginView" &&
-          props.activeRoute.pluginId === plugin.identifier &&
-          props.activeRoute.viewId === view.id;
+      {props.pluginViews.map((item) => {
+        const Icon = pluginViewIcon(item.view);
         return (
           <RailButton
-            key={`${plugin.identifier}:${view.id}`}
-            label={view.title}
-            active={active}
-            style={{ "--rail-tone": `var(--tone-${tone})` } as CSSProperties}
-            onClick={() => props.onRouteChange(pluginViewRoute(plugin.identifier, view.id))}
+            key={`${item.plugin.identifier}:${item.view.id}`}
+            label={item.view.title}
+            active={pluginViewActive(props.activeRoute, item)}
+            onClick={() => props.onRouteChange(pluginViewRoute(item.plugin.identifier, item.view.id))}
           >
-            <Icon className="size-[18px]" />
+            <Icon className="size-[17px]" />
           </RailButton>
         );
       })}
-      <div className="app-rail-divider" aria-hidden="true" />
       <RailButton label={t("Manage plugins")} onClick={props.onManagePlugins}>
-        <Plus className="size-4 text-[var(--text-muted)]" />
+        <Plug className="size-4 text-[var(--text-muted)]" />
       </RailButton>
       <div className="flex-1" />
-      <RailButton label={t("Settings")} active={settingsActive} onClick={() => props.onRouteChange(coreRoute("settings"))}>
+      <RailButton label={`${t("Settings")} (⌘,)`} active={settingsActive} onClick={() => props.onRouteChange(coreRoute("settings"))}>
         <SlidersHorizontal className="size-[17px]" />
       </RailButton>
     </nav>
@@ -89,13 +98,11 @@ export function AppRail(props: AppRailProps) {
 function RailButton({
   label,
   active,
-  style,
   onClick,
   children,
 }: {
   label: string;
   active?: boolean;
-  style?: CSSProperties;
   onClick: () => void;
   children: ReactNode;
 }) {
@@ -106,7 +113,6 @@ function RailButton({
       aria-label={label}
       aria-current={active ? "page" : undefined}
       title={label}
-      style={style}
       onClick={onClick}
     >
       {children}
@@ -114,7 +120,7 @@ function RailButton({
   );
 }
 
-type SidebarProps = {
+type SidebarProps = NavigationProps & {
   resizing: boolean;
   width: number;
   workspaceName: string;
@@ -124,11 +130,11 @@ type SidebarProps = {
   activeAgentName: string | null;
   activeLatestTurn: AgentTurnView | null;
   runtime: RuntimeView | null;
-  onCommandOpen: () => void;
-  onRouteChange: (route: AppRoute) => void;
+  health: { tone: StatusTone; label: string };
+  theme: "light" | "dark";
+  onThemeChange: (theme: "light" | "dark") => void;
   onResizeStart: (event: ReactPointerEvent<HTMLDivElement>) => void;
   onResizeBy: (delta: number) => void;
-  onCreateSession: (parentId?: number) => void;
   onOpenSession: (sessionId: number) => void;
   onOpenWorkspace: () => void;
 };
@@ -136,6 +142,7 @@ type SidebarProps = {
 export function Sidebar(props: SidebarProps) {
   const [workspaceMenuOpen, setWorkspaceMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const chatActive = routeIsCore(props.activeRoute, "chat");
   const nodesById = new Map(props.workspaceNodes.map((node) => [node.id, node]));
   const sessions = props.workspaceNodes.filter(
     (node) => node.kind === "session" && node.sessionId != null,
@@ -164,76 +171,130 @@ export function Sidebar(props: SidebarProps) {
 
   return (
     <aside className="app-sidebar relative flex min-h-0 flex-col overflow-hidden" aria-label={t("Tasks")}>
-      <div className="flex shrink-0 gap-1.5 px-3 pb-2 pt-3">
-        <button type="button" className="sidebar-new-task" onClick={() => props.onCreateSession()}>
-          <Plus className="size-[15px]" />
-          <span className="flex-1 text-left">{t("New task")}</span>
-          <kbd className="text-[11px] font-normal text-[var(--text-muted)]">⌘N</kbd>
+      <div className="flex shrink-0 flex-col gap-0.5 px-2 pb-2 pt-1">
+        <button type="button" className="sidebar-row font-medium text-[var(--text-strong)]" onClick={props.onCreateSession}>
+          <span className="new-task-mark">
+            <Plus className="size-3.5" strokeWidth={2.25} />
+          </span>
+          <span className="min-w-0 flex-1 truncate">{t("New task")}</span>
+          <kbd className="sidebar-row-kbd">⌘N</kbd>
         </button>
-        <button
-          type="button"
-          className="sidebar-square-button"
-          aria-label={`${t("Search tasks and commands")} (⌘K)`}
-          title={`${t("Search tasks and commands")} (⌘K)`}
-          onClick={props.onCommandOpen}
-        >
-          <Search className="size-[15px]" />
+        <button type="button" className="sidebar-row" onClick={props.onCommandOpen}>
+          <span className="sidebar-row-icon">
+            <Search className="size-4" />
+          </span>
+          <span className="min-w-0 flex-1 truncate">{t("Search tasks and commands")}</span>
+          <kbd className="sidebar-row-kbd">⌘K</kbd>
         </button>
+        {props.pluginViews.length ? null : (
+          <button type="button" className="sidebar-row" onClick={props.onManagePlugins}>
+            <span className="sidebar-row-icon">
+              <Plug className="size-4" />
+            </span>
+            <span className="min-w-0 flex-1 truncate">{t("Manage plugins")}</span>
+          </button>
+        )}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-3 pt-1">
-        <h2 className="sidebar-section-label m-0">
-          <span>{t("Tasks")}</span>
-          {sessions.length ? (
-            <span className="mono">{busyCount ? t("{busy} running · {total}", { busy: busyCount, total: sessions.length }) : sessions.length}</span>
-          ) : null}
-        </h2>
-        <div className="flex flex-col gap-px">
+      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-2 pb-3 pt-1">
+        {props.pluginViews.length ? (
+          <section className="flex flex-col gap-0.5" aria-labelledby="sidebar-plugins">
+            <h2 id="sidebar-plugins" className="sidebar-section-label">
+              <span>{t("Plugins")}</span>
+              <button
+                type="button"
+                className="sidebar-label-action"
+                aria-label={t("Manage plugins")}
+                title={t("Manage plugins")}
+                onClick={props.onManagePlugins}
+              >
+                <Plus className="size-3.5" />
+              </button>
+            </h2>
+            {props.pluginViews.map((item) => {
+              const Icon = pluginViewIcon(item.view);
+              const active = pluginViewActive(props.activeRoute, item);
+              return (
+                <button
+                  key={`${item.plugin.identifier}:${item.view.id}`}
+                  type="button"
+                  className={cn("sidebar-row", active && "sidebar-row-active")}
+                  aria-current={active ? "page" : undefined}
+                  title={item.view.title}
+                  onClick={() => props.onRouteChange(pluginViewRoute(item.plugin.identifier, item.view.id))}
+                >
+                  <span className="sidebar-row-icon">
+                    <Icon className="size-4" />
+                  </span>
+                  <span className="min-w-0 flex-1 truncate">{item.view.title}</span>
+                </button>
+              );
+            })}
+          </section>
+        ) : null}
+
+        <section className="flex flex-col gap-0.5" aria-labelledby="sidebar-tasks">
+          <h2 id="sidebar-tasks" className="sidebar-section-label">
+            <span>{t("Tasks")}</span>
+            {sessions.length ? (
+              <span className="font-normal">
+                {busyCount ? t("{busy} running · {total}", { busy: busyCount, total: sessions.length }) : sessions.length}
+              </span>
+            ) : null}
+          </h2>
           {sessions.map((node) => {
             const sessionId = node.sessionId as number;
-            const active = sessionId === props.activeSessionId;
+            const current = sessionId === props.activeSessionId;
+            const active = current && chatActive;
             const parent = node.parentId != null ? nodesById.get(node.parentId) : undefined;
             const nested = parent?.kind === "session";
             const state = sessionRunState(sessionId, props.runtime, props.activeSessionId, props.activeLatestTurn);
-            const detail = sessionDetail(state, active, props.activeAgentName, props.activeLatestTurn);
+            const detail = sessionDetail(state, current, props.activeAgentName, props.activeLatestTurn);
             return (
               <button
                 key={node.id}
                 type="button"
-                className={cn("sidebar-row", nested && "sidebar-row-nested", active && "sidebar-row-active")}
+                className={cn("sidebar-row sidebar-task", nested && "sidebar-task-nested", active && "sidebar-row-active")}
                 aria-current={active ? "page" : undefined}
                 title={displaySessionTitle(node.name)}
                 onClick={() => props.onOpenSession(sessionId)}
               >
-                <SessionStateIcon state={state} active={active} />
                 <span className="flex min-w-0 flex-1 flex-col">
-                  <span className={cn("truncate", active && "font-medium")}>{displaySessionTitle(node.name)}</span>
+                  <span className="truncate">{displaySessionTitle(node.name)}</span>
                   {detail ? (
-                    <span className={cn("truncate text-[11px]", sessionDetailTone(state))}>{detail}</span>
+                    <span className={cn("truncate text-[12px] font-normal leading-4", sessionDetailTone(state))}>{detail}</span>
                   ) : null}
                 </span>
+                <SessionStateIcon state={state} />
               </button>
             );
           })}
-        </div>
-        {!sessions.length ? (
-          <button
-            type="button"
-            className="mx-1 mt-1 w-[calc(100%-0.5rem)] rounded-[var(--radius-control)] border border-dashed border-[var(--line-strong)] px-3 py-4 text-left text-xs leading-5 text-[var(--text-muted)] hover:border-[var(--line-active)] hover:text-[var(--text-strong)] focus-visible:outline-none focus-visible:shadow-[var(--focus-ring)]"
-            onClick={() => props.onCreateSession()}
-          >
-            {t("No tasks yet. Create one to put a local agent to work.")}
-          </button>
-        ) : null}
+          {!sessions.length ? (
+            <button type="button" className="sidebar-empty" onClick={props.onCreateSession}>
+              {t("No tasks yet. Create one to put a local agent to work.")}
+            </button>
+          ) : null}
+        </section>
       </div>
 
       <div ref={menuRef} className="relative shrink-0 p-2">
         {workspaceMenuOpen ? (
           <div className="workspace-menu motion-reveal" role="menu" aria-label={t("Workspace")}>
-            <div className="border-b border-[var(--line)] px-3 py-2.5">
-              <div className="truncate text-[13px] font-medium text-[var(--text-strong)]">{props.workspaceName}</div>
+            <div className="border-b border-[var(--line-soft)] px-3 py-2.5">
+              <div className="truncate font-medium text-[var(--text-strong)]">{props.workspaceName}</div>
               <div className="mono mt-0.5 truncate text-[11px] text-[var(--text-muted)]" title={props.workspacePath}>
                 {props.workspacePath}
+              </div>
+            </div>
+            <div className="flex items-center justify-between gap-2 px-3 pb-1 pt-2.5">
+              <span className="text-[13px] text-[var(--text-soft)]">{t("Appearance")}</span>
+              <div className="segmented segmented-sm" role="group" aria-label={t("Theme")}>
+                <button type="button" className="segmented-item" aria-pressed={props.theme === "light"} onClick={() => props.onThemeChange("light")}>
+                  {t("Light")}
+                </button>
+                <button type="button" className="segmented-item" aria-pressed={props.theme === "dark"} onClick={() => props.onThemeChange("dark")}>
+                  {t("Dark")}
+                </button>
               </div>
             </div>
             <WorkspaceMenuButton
@@ -242,7 +303,7 @@ export function Sidebar(props: SidebarProps) {
                 props.onOpenWorkspace();
               }}
             >
-              <FolderOpen className="size-4" />
+              <FolderOpen className="size-4 text-[var(--text-soft)]" />
               {t("Open another workspace…")}
             </WorkspaceMenuButton>
             <WorkspaceMenuButton
@@ -251,8 +312,9 @@ export function Sidebar(props: SidebarProps) {
                 props.onRouteChange(coreRoute("settings"));
               }}
             >
-              <Settings className="size-4" />
-              {t("Workspace settings")}
+              <Settings className="size-4 text-[var(--text-soft)]" />
+              <span className="flex-1 text-left">{t("Settings")}</span>
+              <kbd className="sidebar-row-kbd">⌘,</kbd>
             </WorkspaceMenuButton>
           </div>
         ) : null}
@@ -263,12 +325,13 @@ export function Sidebar(props: SidebarProps) {
           aria-haspopup="menu"
           onClick={() => setWorkspaceMenuOpen((value) => !value)}
         >
-          <span className="workspace-mark" aria-hidden="true">
-            {props.workspaceName.trim().charAt(0).toLowerCase() || "d"}
+          <span className="workspace-mark">
+            <span aria-hidden="true">{props.workspaceName.trim().charAt(0).toUpperCase() || "D"}</span>
+            <span className="status-dot" data-tone={props.health.tone} role="img" aria-label={props.health.label} title={props.health.label} />
           </span>
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="truncate font-medium">{props.workspaceName}</span>
-            <span className="mono truncate text-[11px] text-[var(--text-muted)]" title={props.workspacePath}>
+            <span className="mono truncate text-[11px] leading-4 text-[var(--text-muted)]" title={props.workspacePath}>
               {abbreviateHome(props.workspacePath)}
             </span>
           </span>
@@ -285,7 +348,7 @@ export function Sidebar(props: SidebarProps) {
         className={cn(
           "absolute inset-y-0 right-0 hidden w-2 cursor-col-resize items-center justify-center lg:flex",
           "after:h-10 after:w-px after:rounded-full after:bg-transparent after:transition-colors hover:after:bg-[var(--line-active)]",
-          "focus-visible:outline-none focus-visible:shadow-[inset_-2px_0_var(--accent)]",
+          "focus-visible:outline-none focus-visible:shadow-[inset_-2px_0_var(--accent-strong)]",
           props.resizing && "after:bg-[var(--line-active)]",
         )}
         role="separator"
@@ -301,7 +364,8 @@ export function Sidebar(props: SidebarProps) {
   );
 }
 
-function SessionStateIcon({ state, active }: { state: RunState; active: boolean }) {
+/** Idle tasks carry no icon; only a state that needs attention earns one. */
+function SessionStateIcon({ state }: { state: RunState }) {
   switch (state) {
     case "running":
       return (
@@ -316,11 +380,7 @@ function SessionStateIcon({ state, active }: { state: RunState; active: boolean 
     case "failed":
       return <CircleAlert className="size-3.5 shrink-0 text-[var(--danger)]" role="img" aria-label={t("Failed")} />;
     default:
-      return (
-        <span className="grid size-3.5 shrink-0 place-items-center" aria-hidden="true">
-          <span className={cn("size-1.5 rounded-full", active ? "bg-[var(--text-strong)]" : "bg-[var(--line-active)]")} />
-        </span>
-      );
+      return null;
   }
 }
 
@@ -367,6 +427,8 @@ export function pluginViewIcon(view: PluginViewContribution) {
       return ChartCandlestick;
     case "notebook-pen":
       return NotebookPen;
+    case "clapperboard":
+      return Clapperboard;
     default:
       return Plug;
   }

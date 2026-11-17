@@ -38,9 +38,9 @@ export function SettingsHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0">
-        <h1 className="m-0 text-[20px] font-semibold leading-7 tracking-[-0.01em] text-[var(--text-strong)]">{title}</h1>
+        <h2 className="m-0 text-[16px] font-semibold leading-6 text-[var(--text-strong)]">{title}</h2>
         <p className="mb-0 mt-0.5 max-w-2xl text-[13px] leading-5 text-[var(--text-soft)]">{detail}</p>
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
@@ -60,7 +60,7 @@ export function SettingRow({
   return (
     <div className="settings-row">
       <div className="min-w-0">
-        <div className="text-[13px] font-medium text-[var(--text-strong)]">{title}</div>
+        <div className="font-medium text-[var(--text-strong)]">{title}</div>
         <div className="mt-0.5 break-all text-[12px] leading-5 text-[var(--text-muted)]">{detail}</div>
       </div>
       <div className="shrink-0">{children}</div>

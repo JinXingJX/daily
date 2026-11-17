@@ -9,7 +9,7 @@ import {
 } from "@/features/chat/chatTypes";
 import { type DesktopCommand } from "@/platform/desktop";
 import { useAppStore } from "@/useAppStore";
-import type { AgentTurnView, AppSnapshot, ComposerImage, DialogueMessage } from "@/types";
+import type { AgentTurnView, AppSnapshot, ComposerImage, DialogueMessage, ProviderKind } from "@/types";
 import { errorMessage } from "@/lib/errors";
 import { readFileAsBase64 } from "@/lib/files";
 import { displaySessionTitle } from "@/features/workspace/sessionTitle";
@@ -39,6 +39,7 @@ export function ChatRoute({
   onOpenSettings,
   inspectorOpen,
   onCloseInspector,
+  signedOutProviders,
 }: {
   draft: string;
   composerImages: ComposerImage[];
@@ -54,6 +55,8 @@ export function ChatRoute({
   onOpenSettings: (target: SettingsTarget) => void;
   inspectorOpen: boolean;
   onCloseInspector: () => void;
+  /** Sign-in providers known to be signed out. */
+  signedOutProviders: ProviderKind[];
 }) {
   const activeSessionId = useAppStore((state) => state.activeSession?.id ?? null);
   const activeSessionTitle = useAppStore((state) => state.activeSession?.title ?? null);
@@ -72,6 +75,7 @@ export function ChatRoute({
   const modelReady = authConfig?.providerKind !== "antigravity_login" || authConfig.models.length > 0;
   const modelId = boundAgent?.model ?? authConfig?.defaultModel ?? modelSettings?.model ?? null;
   const modelLabel = authConfig ? [authConfig.name, modelId].filter(Boolean).join(" · ") : modelId;
+  const modelSignedOut = authConfig ? signedOutProviders.includes(authConfig.providerKind) : false;
   const readiness = useMemo<ChatReadiness>(
     () => ({
       modelLabel: modelLabel ?? t("No model configured"),
@@ -234,6 +238,7 @@ export function ChatRoute({
       modelLabel={modelLabel}
       runtimeIsRunning={sessionRunning}
       modelReady={modelReady}
+      modelSignedOut={modelSignedOut}
       readiness={readiness}
       agents={agentApps}
       messages={renderMessages}

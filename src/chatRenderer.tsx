@@ -38,11 +38,11 @@ SyntaxHighlighter.registerLanguage("rust", rust);
 SyntaxHighlighter.registerLanguage("tsx", tsx);
 SyntaxHighlighter.registerLanguage("typescript", typescript);
 
-const geistCodeTheme = {
+const codeTheme = {
   'code[class*="language-"]': {
     color: "var(--text-strong)",
     background: "transparent",
-    fontFamily: "var(--font-geist-mono)",
+    fontFamily: "var(--font-mono)",
     fontSize: "13px",
     lineHeight: 1.6,
     textAlign: "left" as const,
@@ -55,8 +55,8 @@ const geistCodeTheme = {
   },
   'pre[class*="language-"]': {
     color: "var(--text-strong)",
-    background: "var(--surface-inset)",
-    fontFamily: "var(--font-geist-mono)",
+    background: "var(--surface)",
+    fontFamily: "var(--font-mono)",
     fontSize: "13px",
     lineHeight: 1.6,
     margin: 0,
@@ -99,7 +99,7 @@ export function ChatRenderer({ content, isStreaming }: ChatRendererProps) {
   const stableContent = partialFence ? partialFence.stableContent : content;
 
   return (
-    <div className="space-y-4 break-words text-[15px] leading-7 text-[var(--text-strong)]">
+    <div className="reading space-y-3">
       {stableContent.trim() ? <MarkdownContent content={stableContent} /> : null}
       {partialFence ? renderPluginBlock(partialFence.identifier, partialFence.payload, true).content : null}
     </div>
@@ -112,32 +112,32 @@ function MarkdownContent({ content }: { content: string }) {
       remarkPlugins={[remarkGfm, remarkMath]}
       rehypePlugins={[rehypeKatex]}
       components={{
-        h1: ({ children }) => <h1 className="text-2xl font-semibold text-[var(--text-strong)]">{children}</h1>,
-        h2: ({ children }) => <h2 className="text-xl font-semibold text-[var(--text-strong)]">{children}</h2>,
-        h3: ({ children }) => <h3 className="text-lg font-semibold text-[var(--text-strong)]">{children}</h3>,
-        p: ({ children }) => <p className="text-[var(--text)]">{children}</p>,
-        ul: ({ children }) => <ul className="ml-5 list-disc space-y-1 text-[var(--text)]">{children}</ul>,
-        ol: ({ children }) => <ol className="ml-5 list-decimal space-y-1 text-[var(--text)]">{children}</ol>,
+        h1: ({ children }) => <h1 className="pt-2 text-[24px] font-semibold leading-8">{children}</h1>,
+        h2: ({ children }) => <h2 className="pt-2 text-[20px] font-semibold leading-7">{children}</h2>,
+        h3: ({ children }) => <h3 className="pt-1 text-[17px] font-semibold leading-7">{children}</h3>,
+        p: ({ children }) => <p>{children}</p>,
+        ul: ({ children }) => <ul className="ml-5 list-disc space-y-1 marker:text-[var(--text-muted)]">{children}</ul>,
+        ol: ({ children }) => <ol className="ml-5 list-decimal space-y-1 marker:text-[var(--text-muted)]">{children}</ol>,
         li: ({ children }) => <li className="pl-1">{children}</li>,
         a: ({ children, href }) => (
-          <a className="text-[var(--accent)] underline decoration-[var(--accent-line)] underline-offset-4" href={href}>
+          <a className="text-[var(--accent-text)] underline decoration-[var(--accent-line)] underline-offset-4 hover:decoration-current" href={href}>
             {children}
           </a>
         ),
         blockquote: ({ children }) => (
-          <blockquote className="border-l border-[var(--accent)] pl-4 text-[var(--text-soft)]">{children}</blockquote>
+          <blockquote className="border-l-2 border-[var(--line-strong)] pl-4 text-[var(--text-soft)]">{children}</blockquote>
         ),
         table: ({ children }) => (
-          <div className="overflow-x-auto border-y border-[var(--line)]">
-            <table className="min-w-full border-collapse text-sm">{children}</table>
+          <div className="overflow-x-auto rounded-[var(--radius-panel)] border border-[var(--line)] font-sans">
+            <table className="min-w-full border-collapse text-[14px] leading-5">{children}</table>
           </div>
         ),
         th: ({ children }) => (
-          <th className="border-b border-[var(--line)] bg-[var(--surface-muted)] px-4 py-3 text-left font-medium text-[var(--text-strong)]">
+          <th className="border-b border-[var(--line)] bg-[var(--surface)] px-4 py-2.5 text-left font-medium text-[var(--text-strong)]">
             {children}
           </th>
         ),
-        td: ({ children }) => <td className="border-b border-[var(--line)] px-4 py-3 text-[var(--text)]">{children}</td>,
+        td: ({ children }) => <td className="border-b border-[var(--line-soft)] px-4 py-2.5 text-[var(--text)]">{children}</td>,
         hr: () => <div className="my-4 h-px w-full bg-[var(--line)]" />,
         code({ className, children, ...props }) {
           const language = className?.replace("language-", "") ?? "";
@@ -151,7 +151,7 @@ function MarkdownContent({ content }: { content: string }) {
             return (
               <code
                 {...props}
-                className="rounded-md bg-[var(--surface)] px-1.5 py-0.5 font-mono text-[0.88em] text-[var(--text-strong)]"
+                className="rounded-[6px] bg-[var(--code-bg)] px-1.5 py-0.5 font-mono text-[13px] text-[var(--text-strong)]"
               >
                 {children}
               </code>
@@ -160,14 +160,14 @@ function MarkdownContent({ content }: { content: string }) {
 
           return (
             <SyntaxHighlighter
-              style={geistCodeTheme}
+              style={codeTheme}
               language={language || "text"}
               PreTag="div"
               customStyle={{
                 margin: 0,
-                borderRadius: 8,
-                background: "var(--surface-inset)",
-                padding: "1rem",
+                borderRadius: 12,
+                background: "var(--surface)",
+                padding: "14px 16px",
                 border: "1px solid var(--line)",
               }}
             >
